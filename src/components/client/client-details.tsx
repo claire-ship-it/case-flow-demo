@@ -1,11 +1,13 @@
 "use client"
 
 import { User, Briefcase, Users, CheckCircle, Mail, Phone, Calendar, FileText, ChevronDown, ChevronRight, Link, 
-  Car, FileCheck, BadgeDollarSign, FileWarning, Clock } from "lucide-react"
+  Car, FileCheck, BadgeDollarSign, FileWarning, Clock, Star, Info, PhoneCall, Mail as MailIcon, PlusCircle, AlertTriangle, Home } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
 import { type Client } from "@/data/clients"
 import { useState } from "react"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 interface ClientDetailsProps {
   client: Client
@@ -64,8 +66,21 @@ export function ClientDetails({ client }: ClientDetailsProps) {
     officer: false,
     violations: false,
     people: false,
-    postAccident: true
+    postAccident: true,
+    vehicle: false,
+    clientVehicle: false,
+    defendantVehicle: false,
+    clientVehicleDetails: false,
+    clientDriverInfo: false,
+    clientOwnerInfo: false,
+    clientPassengers: false,
+    defendantVehicleDetails: false,
+    defendantDriverInfo: false,
+    defendantOwnerInfo: false,
+    defendantPassengers: false,
+    accidentNarrative: false
   })
+  const [showInsuranceDialog, setShowInsuranceDialog] = useState(false)
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({
@@ -103,6 +118,134 @@ export function ClientDetails({ client }: ClientDetailsProps) {
       )}
     </div>
   )
+
+  const formatNarrativeWithTooltips = (narrative: string, client: Client) => {
+    // Replace V01 with a tooltip
+    let formattedNarrative = narrative.replace(
+      /V01/g, 
+      `<span class="text-blue-400 cursor-help">V01</span>`
+    );
+    
+    // Replace V02 with a tooltip
+    formattedNarrative = formattedNarrative.replace(
+      /V02/g, 
+      `<span class="text-blue-400 cursor-help">V02</span>`
+    );
+    
+    // Replace D01 with a tooltip
+    formattedNarrative = formattedNarrative.replace(
+      /D01/g, 
+      `<span class="text-blue-400 cursor-help">D01</span>`
+    );
+    
+    // Split the narrative into parts to add tooltips
+    const parts = formattedNarrative.split(/(<span class="text-blue-400 cursor-help">[^<]+<\/span>)/g);
+    
+    return (
+      <TooltipProvider>
+        {parts.map((part, index) => {
+          if (part.includes('V01')) {
+            return (
+              <Tooltip key={index}>
+                <TooltipTrigger asChild>
+                  <span className="text-blue-400 cursor-help">V01</span>
+                </TooltipTrigger>
+                <TooltipContent className="bg-[#1E293B] text-white border-[#374151] p-4 max-w-md">
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Client's Vehicle</h4>
+                    {client.vehicle && (
+                      <>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Year/Make/Model:</span>
+                          <span>{client.vehicle.year} {client.vehicle.make} {client.vehicle.model}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Color:</span>
+                          <span>{client.vehicle.color}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">License Plate:</span>
+                          <span>{client.vehicle.licensePlate}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">VIN:</span>
+                          <span>{client.vehicle.vin}</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            );
+          } else if (part.includes('V02')) {
+            return (
+              <Tooltip key={index}>
+                <TooltipTrigger asChild>
+                  <span className="text-blue-400 cursor-help">V02</span>
+                </TooltipTrigger>
+                <TooltipContent className="bg-[#1E293B] text-white border-[#374151] p-4 max-w-md">
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Defendant's Vehicle</h4>
+                    {client.defendant?.vehicle && (
+                      <>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Year/Make/Model:</span>
+                          <span>{client.defendant.vehicle.year} {client.defendant.vehicle.make} {client.defendant.vehicle.model}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Color:</span>
+                          <span>{client.defendant.vehicle.color}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">License Plate:</span>
+                          <span>{client.defendant.vehicle.licensePlate}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">VIN:</span>
+                          <span>{client.defendant.vehicle.vin}</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            );
+          } else if (part.includes('D01')) {
+            return (
+              <Tooltip key={index}>
+                <TooltipTrigger asChild>
+                  <span className="text-blue-400 cursor-help">D01</span>
+                </TooltipTrigger>
+                <TooltipContent className="bg-[#1E293B] text-white border-[#374151] p-4 max-w-md">
+                  <div className="space-y-2">
+                    <h4 className="font-medium">Client (Driver)</h4>
+                    {client.vehicle?.driver && (
+                      <>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Name:</span>
+                          <span>{client.vehicle.driver.name}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">License Number:</span>
+                          <span>{client.vehicle.driver.licenseNumber}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-gray-400">Insurance:</span>
+                          <span>{client.vehicle.driver.insuranceProvider}</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            );
+          } else {
+            return <span key={index}>{part}</span>;
+          }
+        })}
+      </TooltipProvider>
+    );
+  };
 
   return (
     <div className="w-full lg:w-2/3 bg-[#1E293B] rounded-lg">
@@ -291,42 +434,74 @@ export function ClientDetails({ client }: ClientDetailsProps) {
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-gray-400">Marital Status</span>
-                        <span className="text-white capitalize">{client.maritalStatus}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-400">Spouse's Name</span>
-                        <span className="text-white">{client.spouseName || 'N/A'}</span>
+                        <span className="text-white capitalize">
+                          {client.maritalStatus === "married" && client.spouseName 
+                            ? `Married To ${client.spouseName}`
+                            : client.maritalStatus}
+                        </span>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-gray-400">Education</span>
                         <span className="text-white">{client.education}</span>
                       </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-400">Felony Record</span>
-                        <span className="text-white">{client.hasFelon ? 'Yes' : 'No'}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-400">Live-in Relative</span>
-                        <span className="text-white">{client.liveInRelativeName || 'N/A'}</span>
+                      <div className="flex gap-2 flex-wrap justify-end">
+                        {client.hasFelon && (
+                          <div className="flex items-center gap-1 px-2 py-1 bg-red-900/50 text-red-400 rounded-md text-sm">
+                            <AlertTriangle className="w-4 h-4" />
+                            <span>Felony Record</span>
+                          </div>
+                        )}
+                        {client.liveInRelativeName && (
+                          <div className="flex items-center gap-1 px-2 py-1 bg-blue-900/50 text-blue-400 rounded-md text-sm">
+                            <Home className="w-4 h-4" />
+                            <span>Lives with {client.liveInRelativeName}</span>
+                          </div>
+                        )}
                       </div>
                     </div>
 
                     <div className="space-y-4">
                       <div className="flex justify-between items-center">
                         <span className="text-gray-400">Primary Phone</span>
-                        <span className="text-white">{client.primaryPhone}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-400">Backup Phone</span>
-                        <span className="text-white">{client.backupPhone || 'N/A'}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-white">{client.primaryPhone}</span>
+                          {client.backupPhone && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="flex items-center">
+                                  <PlusCircle className="w-4 h-4 text-blue-400" />
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent className="bg-[#1E293B] text-white border-[#374151] p-3">
+                                <div className="space-y-1">
+                                  <h4 className="font-medium">Backup Phone</h4>
+                                  <p>{client.backupPhone}</p>
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                        </div>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-gray-400">Primary Email</span>
-                        <span className="text-white">{client.primaryEmail}</span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-400">Backup Email</span>
-                        <span className="text-white">{client.backupEmail || 'N/A'}</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-white">{client.primaryEmail}</span>
+                          {client.backupEmail && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <div className="flex items-center">
+                                  <PlusCircle className="w-4 h-4 text-blue-400" />
+                                </div>
+                              </TooltipTrigger>
+                              <TooltipContent className="bg-[#1E293B] text-white border-[#374151] p-3">
+                                <div className="space-y-1">
+                                  <h4 className="font-medium">Backup Email</h4>
+                                  <p>{client.backupEmail}</p>
+                                </div>
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                        </div>
                       </div>
                       <div className="flex justify-between items-center">
                         <span className="text-gray-400">Client Source</span>
@@ -414,6 +589,14 @@ export function ClientDetails({ client }: ClientDetailsProps) {
               <SectionHeader title="Crash Report" section="crash" />
               {expandedSections.crash && client?.crashReport && (
                 <div className="mt-4 space-y-6">
+                  {/* Accident Narrative - Non-collapsible */}
+                  <div className="bg-[#151F2D] rounded-lg p-4">
+                    <h4 className="text-white font-medium mb-3">Accident Narrative</h4>
+                    <div className="text-white text-sm leading-6">
+                      {formatNarrativeWithTooltips(client.crashReport.narrative.accidentDescription, client)}
+                    </div>
+                  </div>
+
                   {/* Document Link */}
                   <div className="flex items-center justify-between">
                     <span className="text-gray-400">Report Document</span>
@@ -459,6 +642,503 @@ export function ClientDetails({ client }: ClientDetailsProps) {
                     )}
                   </div>
 
+                  {/* Vehicle Information Subsection */}
+                  <div className="bg-[#151F2D] rounded-lg">
+                    <div 
+                      className="flex items-center justify-between p-4 cursor-pointer hover:bg-[#1A2433] rounded-lg"
+                      onClick={() => toggleSection('vehicle')}
+                    >
+                      <div className="flex items-center gap-4">
+                        <span className="text-gray-400">Vehicle Information</span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-white">{client.vehicle ? `${client.vehicle.year} ${client.vehicle.make} ${client.vehicle.model}` : 'No vehicle information'}</span>
+                          {client.vehicle?.isClientVehicle && (
+                            <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                          )}
+                        </div>
+                      </div>
+                      {expandedSections.vehicle ? (
+                        <ChevronDown className="w-4 h-4 text-gray-400" />
+                      ) : (
+                        <ChevronRight className="w-4 h-4 text-gray-400" />
+                      )}
+                    </div>
+                    
+                    {expandedSections.vehicle && (
+                      <div className="px-4 pb-4 space-y-4 border-t border-[#374151]">
+                        {/* Client's Vehicle Card */}
+                        {client.vehicle && (
+                          <div className="bg-[#1A2433] rounded-lg overflow-hidden">
+                            <div 
+                              className="flex items-center justify-between p-4 cursor-pointer hover:bg-[#243042]"
+                              onClick={() => toggleSection('clientVehicle')}
+                            >
+                              <div className="flex items-center gap-3">
+                                <h4 className="text-white font-medium flex items-center gap-2">
+                                  Client's Vehicle
+                                  {client.vehicle.isClientVehicle && (
+                                    <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                                  )}
+                                </h4>
+                                <span className="text-gray-400 text-sm">
+                                  {client.vehicle.year} {client.vehicle.make} {client.vehicle.model}
+                                </span>
+                              </div>
+                              {expandedSections.clientVehicle ? (
+                                <ChevronDown className="w-4 h-4 text-gray-400" />
+                              ) : (
+                                <ChevronRight className="w-4 h-4 text-gray-400" />
+                              )}
+                            </div>
+                            
+                            {expandedSections.clientVehicle && (
+                              <div className="px-4 pb-4 space-y-4 border-t border-[#374151]">
+                                {/* Vehicle Details */}
+                                <div className="bg-[#151F2D] rounded-lg overflow-hidden">
+                                  <div 
+                                    className="flex items-center justify-between p-3 cursor-pointer hover:bg-[#1A2433]"
+                                    onClick={() => toggleSection('clientVehicleDetails')}
+                                  >
+                                    <h4 className="text-white font-medium">Vehicle Details</h4>
+                                    {expandedSections.clientVehicleDetails ? (
+                                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                                    ) : (
+                                      <ChevronRight className="w-4 h-4 text-gray-400" />
+                                    )}
+                                  </div>
+                                  
+                                  {expandedSections.clientVehicleDetails && (
+                                    <div className="px-3 pb-3 space-y-3 border-t border-[#374151]">
+                                      <div className="flex justify-between items-center pt-3">
+                                        <span className="text-gray-400">Year</span>
+                                        <span className="text-white">{client.vehicle.year}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-gray-400">Make</span>
+                                        <span className="text-white">{client.vehicle.make}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-gray-400">Model</span>
+                                        <span className="text-white">{client.vehicle.model}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-gray-400">Color</span>
+                                        <span className="text-white">{client.vehicle.color}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-gray-400">VIN</span>
+                                        <span className="text-white">{client.vehicle.vin}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-gray-400">License Plate</span>
+                                        <span className="text-white">{client.vehicle.licensePlate}</span>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Driver Information */}
+                                <div className="bg-[#151F2D] rounded-lg overflow-hidden">
+                                  <div 
+                                    className="flex items-center justify-between p-3 cursor-pointer hover:bg-[#1A2433]"
+                                    onClick={() => toggleSection('clientDriverInfo')}
+                                  >
+                                    <h4 className="text-white font-medium">Driver Information</h4>
+                                    {expandedSections.clientDriverInfo ? (
+                                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                                    ) : (
+                                      <ChevronRight className="w-4 h-4 text-gray-400" />
+                                    )}
+                                  </div>
+                                  
+                                  {expandedSections.clientDriverInfo && (
+                                    <div className="px-3 pb-3 space-y-3 border-t border-[#374151]">
+                                      <div className="flex justify-between items-center pt-3">
+                                        <span className="text-gray-400">Name</span>
+                                        <span className="text-white">{client.vehicle.driver.name}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-gray-400">License Number</span>
+                                        <span className="text-white">{client.vehicle.driver.licenseNumber}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-gray-400">Insurance Provider</span>
+                                        <Dialog open={showInsuranceDialog} onOpenChange={setShowInsuranceDialog}>
+                                          <DialogTrigger asChild>
+                                            <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300">
+                                              <span>{client.vehicle.driver.insuranceProvider}</span>
+                                              <Info className="w-4 h-4" />
+                                            </button>
+                                          </DialogTrigger>
+                                          <DialogContent className="bg-[#1E293B] text-white border-[#374151]">
+                                            <DialogHeader>
+                                              <DialogTitle className="text-xl font-semibold">Insurance Information</DialogTitle>
+                                            </DialogHeader>
+                                            <div className="space-y-4 mt-4">
+                                              <div className="bg-[#151F2D] p-4 rounded-lg">
+                                                <div className="flex justify-between items-center mb-3">
+                                                  <div>
+                                                    <h3 className="text-white font-medium">{client.vehicle.driver.insuranceProvider}</h3>
+                                                    <p className="text-gray-400 text-sm">BI Policy</p>
+                                                  </div>
+                                                  <span className="text-white font-medium">$50,000.00</span>
+                                                </div>
+                                                <Progress value={60} className="h-2" />
+                                                <div className="flex justify-between items-center mt-2">
+                                                  <div className="flex gap-2">
+                                                    <span className="text-gray-400 text-sm">Expected: $30,000.00</span>
+                                                    <span className="text-red-400 text-sm">Firm: -$9,900.00</span>
+                                                  </div>
+                                                  <span className="text-blue-400 text-sm">60%</span>
+                                                </div>
+                                              </div>
+                                              <div className="space-y-3">
+                                                <div className="flex justify-between items-center">
+                                                  <span className="text-gray-400">Policy Number</span>
+                                                  <span className="text-white">{client.vehicle.driver.policyNumber}</span>
+                                                </div>
+                                                <div className="flex justify-between items-center">
+                                                  <span className="text-gray-400">Status</span>
+                                                  <span className="text-green-400">Active</span>
+                                                </div>
+                                                <div className="flex justify-between items-center">
+                                                  <span className="text-gray-400">Coverage Type</span>
+                                                  <span className="text-white">Bodily Injury</span>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </DialogContent>
+                                        </Dialog>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Vehicle Owner Information */}
+                                <div className="bg-[#151F2D] rounded-lg overflow-hidden">
+                                  <div 
+                                    className="flex items-center justify-between p-3 cursor-pointer hover:bg-[#1A2433]"
+                                    onClick={() => toggleSection('clientOwnerInfo')}
+                                  >
+                                    <h4 className="text-white font-medium">Vehicle Owner</h4>
+                                    {expandedSections.clientOwnerInfo ? (
+                                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                                    ) : (
+                                      <ChevronRight className="w-4 h-4 text-gray-400" />
+                                    )}
+                                  </div>
+                                  
+                                  {expandedSections.clientOwnerInfo && (
+                                    <div className="px-3 pb-3 space-y-3 border-t border-[#374151]">
+                                      <div className="flex justify-between items-center pt-3">
+                                        <span className="text-gray-400">Name</span>
+                                        <span className="text-white">{client.vehicle.owner.name}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-gray-400">Address</span>
+                                        <span className="text-white">{client.vehicle.owner.address}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-gray-400">Phone</span>
+                                        <span className="text-white">{client.vehicle.owner.phone}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-gray-400">Relationship</span>
+                                        <span className="text-white">{client.vehicle.owner.relationship}</span>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Passengers Information */}
+                                {client.vehicle?.passengers && client.vehicle.passengers.length > 0 && (
+                                  <div className="bg-[#151F2D] rounded-lg overflow-hidden">
+                                    <div 
+                                      className="flex items-center justify-between p-3 cursor-pointer hover:bg-[#1A2433]"
+                                      onClick={() => toggleSection('clientPassengers')}
+                                    >
+                                      <h4 className="text-white font-medium">Passengers ({client.vehicle.passengers.length})</h4>
+                                      {expandedSections.clientPassengers ? (
+                                        <ChevronDown className="w-4 h-4 text-gray-400" />
+                                      ) : (
+                                        <ChevronRight className="w-4 h-4 text-gray-400" />
+                                      )}
+                                    </div>
+                                    
+                                    {expandedSections.clientPassengers && (
+                                      <div className="px-3 pb-3 space-y-4 border-t border-[#374151]">
+                                        {client.vehicle.passengers.map((passenger, index) => (
+                                          <div key={index} className="space-y-2 p-3 bg-[#1A2433] rounded-md">
+                                            <div className="flex justify-between items-center">
+                                              <span className="text-gray-400">Name</span>
+                                              <div className="flex items-center gap-2">
+                                                <span className="text-white">{passenger.name}</span>
+                                                {passenger.isClient && (
+                                                  <Star className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+                                                )}
+                                              </div>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                              <span className="text-gray-400">Age</span>
+                                              <span className="text-white">{passenger.age}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                              <span className="text-gray-400">Seat Position</span>
+                                              <span className="text-white">{passenger.seatPosition}</span>
+                                            </div>
+                                            {passenger.injuries && (
+                                              <div className="flex flex-col gap-2">
+                                                <span className="text-gray-400">Injuries</span>
+                                                <p className="text-white text-sm leading-6">{passenger.injuries}</p>
+                                              </div>
+                                            )}
+                                            {index < (client.vehicle?.passengers?.length || 0) - 1 && (
+                                              <div className="border-t border-[#374151] mt-3"></div>
+                                            )}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Defendant's Vehicle Card */}
+                        {client.defendant?.vehicle && (
+                          <div className="bg-[#1A2433] rounded-lg overflow-hidden">
+                            <div 
+                              className="flex items-center justify-between p-4 cursor-pointer hover:bg-[#243042]"
+                              onClick={() => toggleSection('defendantVehicle')}
+                            >
+                              <div className="flex items-center gap-3">
+                                <h4 className="text-white font-medium">Defendant's Vehicle</h4>
+                                <span className="text-gray-400 text-sm">
+                                  {client.defendant.vehicle.year} {client.defendant.vehicle.make} {client.defendant.vehicle.model}
+                                </span>
+                              </div>
+                              {expandedSections.defendantVehicle ? (
+                                <ChevronDown className="w-4 h-4 text-gray-400" />
+                              ) : (
+                                <ChevronRight className="w-4 h-4 text-gray-400" />
+                              )}
+                            </div>
+                            
+                            {expandedSections.defendantVehicle && (
+                              <div className="px-4 pb-4 space-y-4 border-t border-[#374151]">
+                                {/* Vehicle Details */}
+                                <div className="bg-[#151F2D] rounded-lg overflow-hidden">
+                                  <div 
+                                    className="flex items-center justify-between p-3 cursor-pointer hover:bg-[#1A2433]"
+                                    onClick={() => toggleSection('defendantVehicleDetails')}
+                                  >
+                                    <h4 className="text-white font-medium">Vehicle Details</h4>
+                                    {expandedSections.defendantVehicleDetails ? (
+                                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                                    ) : (
+                                      <ChevronRight className="w-4 h-4 text-gray-400" />
+                                    )}
+                                  </div>
+                                  
+                                  {expandedSections.defendantVehicleDetails && (
+                                    <div className="px-3 pb-3 space-y-3 border-t border-[#374151]">
+                                      <div className="flex justify-between items-center pt-3">
+                                        <span className="text-gray-400">Year</span>
+                                        <span className="text-white">{client.defendant.vehicle.year}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-gray-400">Make</span>
+                                        <span className="text-white">{client.defendant.vehicle.make}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-gray-400">Model</span>
+                                        <span className="text-white">{client.defendant.vehicle.model}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-gray-400">Color</span>
+                                        <span className="text-white">{client.defendant.vehicle.color}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-gray-400">VIN</span>
+                                        <span className="text-white">{client.defendant.vehicle.vin}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-gray-400">License Plate</span>
+                                        <span className="text-white">{client.defendant.vehicle.licensePlate}</span>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Defendant's Driver Information */}
+                                <div className="bg-[#151F2D] rounded-lg overflow-hidden">
+                                  <div 
+                                    className="flex items-center justify-between p-3 cursor-pointer hover:bg-[#1A2433]"
+                                    onClick={() => toggleSection('defendantDriverInfo')}
+                                  >
+                                    <h4 className="text-white font-medium">Driver Information</h4>
+                                    {expandedSections.defendantDriverInfo ? (
+                                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                                    ) : (
+                                      <ChevronRight className="w-4 h-4 text-gray-400" />
+                                    )}
+                                  </div>
+                                  
+                                  {expandedSections.defendantDriverInfo && (
+                                    <div className="px-3 pb-3 space-y-3 border-t border-[#374151]">
+                                      <div className="flex justify-between items-center pt-3">
+                                        <span className="text-gray-400">Name</span>
+                                        <span className="text-white">{client.defendant.vehicle.driver.name}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-gray-400">License Number</span>
+                                        <span className="text-white">{client.defendant.vehicle.driver.licenseNumber}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-gray-400">Insurance Provider</span>
+                                        <Dialog>
+                                          <DialogTrigger asChild>
+                                            <button className="flex items-center gap-1 text-blue-400 hover:text-blue-300">
+                                              <span>{client.defendant.vehicle.driver.insuranceProvider}</span>
+                                              <Info className="w-4 h-4" />
+                                            </button>
+                                          </DialogTrigger>
+                                          <DialogContent className="bg-[#1E293B] text-white border-[#374151]">
+                                            <DialogHeader>
+                                              <DialogTitle className="text-xl font-semibold">Insurance Information</DialogTitle>
+                                            </DialogHeader>
+                                            <div className="space-y-4 mt-4">
+                                              <div className="bg-[#151F2D] p-4 rounded-lg">
+                                                <div className="flex justify-between items-center mb-3">
+                                                  <div>
+                                                    <h3 className="text-white font-medium">{client.defendant.vehicle.driver.insuranceProvider}</h3>
+                                                    <p className="text-gray-400 text-sm">UM Policy</p>
+                                                  </div>
+                                                  <span className="text-white font-medium">$25,000.00</span>
+                                                </div>
+                                                <Progress value={80} className="h-2" />
+                                                <div className="flex justify-between items-center mt-2">
+                                                  <div className="flex gap-2">
+                                                    <span className="text-gray-400 text-sm">Expected: $20,000.00</span>
+                                                    <span className="text-red-400 text-sm">Firm: -$6,600.00</span>
+                                                  </div>
+                                                  <span className="text-blue-400 text-sm">80%</span>
+                                                </div>
+                                              </div>
+                                              <div className="space-y-3">
+                                                <div className="flex justify-between items-center">
+                                                  <span className="text-gray-400">Policy Number</span>
+                                                  <span className="text-white">{client.defendant.vehicle.driver.policyNumber}</span>
+                                                </div>
+                                                <div className="flex justify-between items-center">
+                                                  <span className="text-gray-400">Status</span>
+                                                  <span className="text-green-400">Active</span>
+                                                </div>
+                                                <div className="flex justify-between items-center">
+                                                  <span className="text-gray-400">Coverage Type</span>
+                                                  <span className="text-white">Uninsured Motorist</span>
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </DialogContent>
+                                        </Dialog>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Defendant's Vehicle Owner Information */}
+                                <div className="bg-[#151F2D] rounded-lg overflow-hidden">
+                                  <div 
+                                    className="flex items-center justify-between p-3 cursor-pointer hover:bg-[#1A2433]"
+                                    onClick={() => toggleSection('defendantOwnerInfo')}
+                                  >
+                                    <h4 className="text-white font-medium">Vehicle Owner</h4>
+                                    {expandedSections.defendantOwnerInfo ? (
+                                      <ChevronDown className="w-4 h-4 text-gray-400" />
+                                    ) : (
+                                      <ChevronRight className="w-4 h-4 text-gray-400" />
+                                    )}
+                                  </div>
+                                  
+                                  {expandedSections.defendantOwnerInfo && (
+                                    <div className="px-3 pb-3 space-y-3 border-t border-[#374151]">
+                                      <div className="flex justify-between items-center pt-3">
+                                        <span className="text-gray-400">Name</span>
+                                        <span className="text-white">{client.defendant.vehicle.owner.name}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-gray-400">Address</span>
+                                        <span className="text-white">{client.defendant.vehicle.owner.address}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-gray-400">Phone</span>
+                                        <span className="text-white">{client.defendant.vehicle.owner.phone}</span>
+                                      </div>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-gray-400">Relationship</span>
+                                        <span className="text-white">{client.defendant.vehicle.owner.relationship}</span>
+                                      </div>
+                                    </div>
+                                  )}
+                                </div>
+
+                                {/* Defendant's Passengers Information */}
+                                {client.defendant?.vehicle?.passengers && client.defendant.vehicle.passengers.length > 0 && (
+                                  <div className="bg-[#151F2D] rounded-lg overflow-hidden">
+                                    <div 
+                                      className="flex items-center justify-between p-3 cursor-pointer hover:bg-[#1A2433]"
+                                      onClick={() => toggleSection('defendantPassengers')}
+                                    >
+                                      <h4 className="text-white font-medium">Passengers ({client.defendant.vehicle.passengers.length})</h4>
+                                      {expandedSections.defendantPassengers ? (
+                                        <ChevronDown className="w-4 h-4 text-gray-400" />
+                                      ) : (
+                                        <ChevronRight className="w-4 h-4 text-gray-400" />
+                                      )}
+                                    </div>
+                                    
+                                    {expandedSections.defendantPassengers && (
+                                      <div className="px-3 pb-3 space-y-4 border-t border-[#374151]">
+                                        {client.defendant.vehicle.passengers.map((passenger, index) => (
+                                          <div key={index} className="space-y-2 p-3 bg-[#1A2433] rounded-md">
+                                            <div className="flex justify-between items-center">
+                                              <span className="text-gray-400">Name</span>
+                                              <span className="text-white">{passenger.name}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                              <span className="text-gray-400">Age</span>
+                                              <span className="text-white">{passenger.age}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center">
+                                              <span className="text-gray-400">Seat Position</span>
+                                              <span className="text-white">{passenger.seatPosition}</span>
+                                            </div>
+                                            {passenger.injuries && (
+                                              <div className="flex flex-col gap-2">
+                                                <span className="text-gray-400">Injuries</span>
+                                                <p className="text-white text-sm leading-6">{passenger.injuries}</p>
+                                              </div>
+                                            )}
+                                            {index < (client.defendant?.vehicle?.passengers?.length || 0) - 1 && (
+                                              <div className="border-t border-[#374151] mt-3"></div>
+                                            )}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
                   {/* Violations Subsection */}
                   <div className="bg-[#151F2D] rounded-lg">
                     <div 
@@ -492,7 +1172,7 @@ export function ClientDetails({ client }: ClientDetailsProps) {
                               <span className="text-gray-400">Severity</span>
                               <span className="text-white">{violation.severity}</span>
                             </div>
-                            {index < client.crashReport.violations.length - 1 && (
+                            {client.crashReport && client.crashReport.violations && index < client.crashReport.violations.length - 1 && (
                               <div className="border-t border-[#374151] mt-3"></div>
                             )}
                           </div>
@@ -521,7 +1201,7 @@ export function ClientDetails({ client }: ClientDetailsProps) {
                     {expandedSections.people && (
                       <div className="px-4 pb-4 space-y-4 border-t border-[#374151]">
                         {client.crashReport.people.map((person, index) => (
-                          <div key={index} className="space-y-2 p-3 bg-[#1A2433] rounded-md mt-3">
+                          <div key={index} className="space-y-2 p-3 bg-[#151F2D] rounded-md mt-3">
                             <div className="flex justify-between items-center">
                               <span className="text-gray-400">Name</span>
                               <span className="text-white">{person.name}</span>

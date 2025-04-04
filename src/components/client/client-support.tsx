@@ -11,6 +11,24 @@ export function ClientSupport() {
   const [selectedPolicy, setSelectedPolicy] = useState<number | null>(null)
   const [selectedTreatment, setSelectedTreatment] = useState<number | null>(null)
   const [documentSearch, setDocumentSearch] = useState('')
+  const [expandedSections, setExpandedSections] = useState({
+    relations: true,
+    policyDetails: true,
+    vehicleInfo: true,
+    financialInfo: true
+  })
+  const [isVehicleCardFlipped, setIsVehicleCardFlipped] = useState(false)
+
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }))
+  }
+
+  const toggleVehicleCard = () => {
+    setIsVehicleCardFlipped(!isVehicleCardFlipped)
+  }
 
   const tabs = [
     { id: 'defendants', label: 'Defendants' },
@@ -43,7 +61,19 @@ export function ClientSupport() {
       expectedFirmFee: "$11,666",
       finalSettlement: "Pending",
       finalFirmFee: "Pending",
-      documents: ["policy.pdf", "claim.pdf"]
+      documents: ["policy.pdf", "claim.pdf"],
+      vehicle: {
+        year: "2005",
+        make: "Dodge",
+        model: "Ram 1500",
+        color: "Silver",
+        vin: "1D7HA18N85J123456",
+        licensePlate: "AL-ABC123",
+        driver: {
+          name: "John Smith",
+          licenseNumber: "AL-12345678"
+        }
+      }
     },
     {
       id: 2,
@@ -64,7 +94,19 @@ export function ClientSupport() {
       expectedFirmFee: "$6,666",
       finalSettlement: "$22,000",
       finalFirmFee: "$7,333",
-      documents: ["policy.pdf"]
+      documents: ["policy.pdf"],
+      vehicle: {
+        year: "2018",
+        make: "Toyota",
+        model: "Camry",
+        color: "Blue",
+        vin: "4T1C11AK7JU123456",
+        licensePlate: "AL-XYZ789",
+        driver: {
+          name: "Jane Doe",
+          licenseNumber: "AL-87654321"
+        }
+      }
     }
   ]
 
@@ -305,16 +347,39 @@ export function ClientSupport() {
                   <div
                     key={policy.id}
                     onClick={() => setSelectedPolicy(policy.id)}
-                    className={`flex items-center p-4 bg-[#151F2D] rounded-xl cursor-pointer ${
+                    className={`relative flex items-center p-4 bg-[#151F2D] rounded-xl cursor-pointer ${
                       selectedPolicy === policy.id ? 'border-l-2 border-[#228BE6]' : ''
                     }`}
                   >
-                    <div className="h-10 w-10 bg-[#4F378B] rounded-full flex items-center justify-center text-white">
-                      <span className="text-sm">{policy.policyType}</span>
-                    </div>
-                    <div className="ml-4">
-                      <h3 className="text-[16px] font-medium text-[#E6E0E9]">{policy.provider.name}</h3>
-                      <p className="text-[14px] text-[#E6E0E9]">Policy #{policy.policyNumber}</p>
+                    <div className="flex-1 flex items-center gap-4">
+                      <div className="h-10 w-10 bg-white rounded-full flex items-center justify-center overflow-hidden p-1">
+                        {policy.provider.name.includes("Progressive") ? (
+                          <img src="/logo/Progressive-logo.png" alt="Progressive Insurance" className="w-full h-full object-contain" />
+                        ) : policy.provider.name.includes("State Farm") ? (
+                          <img src="/logo/statefarm.jpg" alt="State Farm Insurance" className="w-full h-full object-contain" />
+                        ) : (
+                          <span className="text-sm">{policy.policyType}</span>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-[16px] font-medium text-[#E6E0E9]">{policy.provider.name}</h3>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            policy.policyType === 'UM' ? 'bg-blue-900/50 text-blue-400' :
+                            policy.policyType === 'BI' ? 'bg-green-900/50 text-green-400' :
+                            policy.policyType === 'PIP' ? 'bg-purple-900/50 text-purple-400' :
+                            'bg-orange-900/50 text-orange-400'
+                          }`}>
+                            {policy.policyType}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1">
+                          <div className="h-5 w-5 bg-[#374151] rounded-full flex items-center justify-center text-[#E6E0E9]">
+                            👤
+                          </div>
+                          <p className="text-[14px] text-[#E6E0E9]">{policy.defendant.name} • #{policy.policyNumber}</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -330,122 +395,153 @@ export function ClientSupport() {
             {/* Right panel - Policy details */}
             <div className="w-1/2">
               {selectedPolicy ? (
-                <div className="space-y-6">
-                  {/* Relations */}
-                  <div className="border-b border-[#5F6979] pb-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-[20px] font-medium text-white">Relations</h2>
-                      <ChevronDown size={20} className="text-[#D9D9D9]" />
-                    </div>
-                    <div className="space-y-4">
-                      {insurancePolicies.find(p => p.id === selectedPolicy) && (
-                        <>
-                          {/* Defendant Card */}
-                          <div className="bg-[#151F2D] p-3 rounded-lg">
-                            <span className="text-gray-400 text-sm mb-2 block">Defendant</span>
-                            <div className="flex items-center">
-                              <Avatar className="h-8 w-8 bg-[#4F378B] text-white">
-                                <span className="text-sm">
-                                  {insurancePolicies.find(p => p.id === selectedPolicy)?.defendant.name.split(' ').map(n => n[0]).join('')}
-                                </span>
-                              </Avatar>
-                              <div className="ml-3">
-                                <p className="text-white text-sm font-medium">
-                                  {insurancePolicies.find(p => p.id === selectedPolicy)?.defendant.name}
-                                </p>
-                                <p className="text-gray-400 text-xs">
-                                  {insurancePolicies.find(p => p.id === selectedPolicy)?.defendant.role}
-                                </p>
+                <div className="mt-4 space-y-6">
+                  {/* Combined Policy Card - Removed Relations title */}
+                  <div className="space-y-4">
+                    {insurancePolicies.find(p => p.id === selectedPolicy) && (
+                      <>
+                        {/* Combined Policy Card */}
+                        <div className="bg-[#151F2D] p-4 rounded-lg">
+                          <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                              <div className="h-12 w-12 bg-white rounded-full flex items-center justify-center overflow-hidden p-1">
+                                {insurancePolicies.find(p => p.id === selectedPolicy)?.provider.name.includes("Progressive") ? (
+                                  <img src="/logo/Progressive-logo.png" alt="Progressive Insurance" className="w-full h-full object-contain" />
+                                ) : insurancePolicies.find(p => p.id === selectedPolicy)?.provider.name.includes("State Farm") ? (
+                                  <img src="/logo/statefarm.jpg" alt="State Farm Insurance" className="w-full h-full object-contain" />
+                                ) : (
+                                  <span className="text-sm">{insurancePolicies.find(p => p.id === selectedPolicy)?.policyType}</span>
+                                )}
+                              </div>
+                              <div>
+                                <h4 className="text-[#E6E0E9] font-medium text-lg">{insurancePolicies.find(p => p.id === selectedPolicy)?.provider.name}</h4>
+                                <p className="text-gray-400 text-sm">{insurancePolicies.find(p => p.id === selectedPolicy)?.provider.type}</p>
+                              </div>
+                            </div>
+                            <div className={`px-3 py-1.5 rounded-full text-xs font-medium ${
+                              insurancePolicies.find(p => p.id === selectedPolicy)?.policyType === 'UM' ? 'bg-blue-900/50 text-blue-400' :
+                              insurancePolicies.find(p => p.id === selectedPolicy)?.policyType === 'BI' ? 'bg-green-900/50 text-green-400' :
+                              insurancePolicies.find(p => p.id === selectedPolicy)?.policyType === 'PIP' ? 'bg-purple-900/50 text-purple-400' :
+                              'bg-orange-900/50 text-orange-400'
+                            }`}>
+                              {insurancePolicies.find(p => p.id === selectedPolicy)?.policyType} Policy
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-6 mt-6">
+                            {/* Left Column */}
+                            <div className="space-y-4">
+                              <div>
+                                <h5 className="text-gray-400 text-sm mb-2 font-bold">Policy Details</h5>
+                                <div className="space-y-2">
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-gray-400">Policy Number</span>
+                                    <span className="text-[#E6E0E9]">#{insurancePolicies.find(p => p.id === selectedPolicy)?.policyNumber}</span>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-gray-400">Claim Number</span>
+                                    <span className="text-[#E6E0E9]">{insurancePolicies.find(p => p.id === selectedPolicy)?.claimNumber}</span>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-gray-400">Insurance Type</span>
+                                    <span className="text-[#E6E0E9]">{insurancePolicies.find(p => p.id === selectedPolicy)?.insuranceType}</span>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-gray-400">Liability Determined</span>
+                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                      insurancePolicies.find(p => p.id === selectedPolicy)?.id === 1 ? 'bg-red-900/50 text-red-400' : 'bg-green-900/50 text-green-400'
+                                    }`}>
+                                      {insurancePolicies.find(p => p.id === selectedPolicy)?.id === 1 ? '75%' : '25%'}
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Right Column */}
+                            <div className="space-y-4">
+                              <div>
+                                <h5 className="text-gray-400 text-sm mb-2 font-bold">Financial Details</h5>
+                                <div className="space-y-2">
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-gray-400">Policy Limit</span>
+                                    <span className="text-[#E6E0E9] font-medium">{insurancePolicies.find(p => p.id === selectedPolicy)?.limit}</span>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-gray-400">Expected Settlement</span>
+                                    <span className="text-[#E6E0E9]">{insurancePolicies.find(p => p.id === selectedPolicy)?.expectedSettlement}</span>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-gray-400">Expected Firm Fee</span>
+                                    <span className="text-red-400">{insurancePolicies.find(p => p.id === selectedPolicy)?.expectedFirmFee}</span>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
 
-                          {/* Provider Card */}
-                          <div className="bg-[#151F2D] p-3 rounded-lg">
-                            <span className="text-gray-400 text-sm mb-2 block">Provider</span>
-                            <div className="flex items-center">
-                              <Avatar className="h-8 w-8 bg-[#4F378B] text-white">
-                                <span className="text-sm">
-                                  {insurancePolicies.find(p => p.id === selectedPolicy)?.provider.name.split(' ').map(n => n[0]).join('')}
-                                </span>
-                              </Avatar>
-                              <div className="ml-3">
-                                <p className="text-white text-sm font-medium">
-                                  {insurancePolicies.find(p => p.id === selectedPolicy)?.provider.name}
-                                </p>
-                                <p className="text-gray-400 text-xs">
-                                  {insurancePolicies.find(p => p.id === selectedPolicy)?.provider.type}
-                                </p>
+                          {/* Policy Holder - Moved to bottom */}
+                          <div className="mt-6">
+                            <h5 className="text-gray-400 text-sm mb-2 font-bold">Policy Holder</h5>
+                            <div className="flex items-center gap-2">
+                              <div className="h-8 w-8 bg-[#374151] rounded-full flex items-center justify-center text-[#E6E0E9]">
+                                👤
+                              </div>
+                              <div>
+                                <p className="text-[#E6E0E9]">{insurancePolicies.find(p => p.id === selectedPolicy)?.defendant.name}</p>
+                                <p className="text-gray-400 text-sm">{insurancePolicies.find(p => p.id === selectedPolicy)?.defendant.role}</p>
                               </div>
                             </div>
                           </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
 
-                  {/* Policy Details */}
-                  <div className="border-b border-[#5F6979] pb-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-[20px] font-medium text-white">Policy Details</h2>
-                      <ChevronDown size={20} className="text-[#D9D9D9]" />
-                    </div>
-                    <div className="space-y-2">
-                      {insurancePolicies.find(p => p.id === selectedPolicy) && (
-                        <>
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-400">Policy Type</span>
-                            <span className="text-white">{insurancePolicies.find(p => p.id === selectedPolicy)?.policyType}</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-400">Insurance Type</span>
-                            <span className="text-white">{insurancePolicies.find(p => p.id === selectedPolicy)?.insuranceType}</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-400">Claim Number</span>
-                            <span className="text-white">{insurancePolicies.find(p => p.id === selectedPolicy)?.claimNumber}</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-400">Policy Number</span>
-                            <span className="text-white">{insurancePolicies.find(p => p.id === selectedPolicy)?.policyNumber}</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-400">Policy Limit</span>
-                            <span className="text-white">{insurancePolicies.find(p => p.id === selectedPolicy)?.limit}</span>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  </div>
+                          {/* Vehicle Information - Two Column Layout */}
+                          <div className="mt-6 border-t border-[#5F6979] pt-6">
+                            <h2 className="text-[20px] font-medium text-white mb-4">Vehicle Information</h2>
+                            <div className="grid grid-cols-2 gap-6">
+                              {/* Vehicle Details Column */}
+                              <div className="bg-[#151F2D] p-4 rounded-lg">
+                                <h4 className="text-gray-400 mb-4 font-bold">Vehicle Details</h4>
+                                <div className="space-y-3">
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-gray-400">Year/Make/Model</span>
+                                    <span className="text-white">
+                                      {`${insurancePolicies.find(p => p.id === selectedPolicy)?.vehicle.year} ${insurancePolicies.find(p => p.id === selectedPolicy)?.vehicle.make} ${insurancePolicies.find(p => p.id === selectedPolicy)?.vehicle.model}`}
+                                    </span>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-gray-400">Color</span>
+                                    <span className="text-white">{insurancePolicies.find(p => p.id === selectedPolicy)?.vehicle.color}</span>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-gray-400">VIN</span>
+                                    <span className="text-white">{insurancePolicies.find(p => p.id === selectedPolicy)?.vehicle.vin}</span>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-gray-400">License Plate</span>
+                                    <span className="text-white">{insurancePolicies.find(p => p.id === selectedPolicy)?.vehicle.licensePlate}</span>
+                                  </div>
+                                </div>
+                              </div>
 
-                  {/* Financial Information */}
-                  <div className="border-b border-[#5F6979] pb-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-[20px] font-medium text-white">Financial Information</h2>
-                      <ChevronDown size={20} className="text-[#D9D9D9]" />
-                    </div>
-                    <div className="space-y-2">
-                      {insurancePolicies.find(p => p.id === selectedPolicy) && (
-                        <>
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-400">Expected Settlement</span>
-                            <span className="text-white">{insurancePolicies.find(p => p.id === selectedPolicy)?.expectedSettlement}</span>
+                              {/* Driver Information Column */}
+                              <div className="bg-[#151F2D] p-4 rounded-lg">
+                                <h4 className="text-gray-400 mb-4 font-bold">Driver Information</h4>
+                                <div className="space-y-3">
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-gray-400">Driver Name</span>
+                                    <span className="text-white">{insurancePolicies.find(p => p.id === selectedPolicy)?.vehicle.driver.name}</span>
+                                  </div>
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-gray-400">License Number</span>
+                                    <span className="text-white">{insurancePolicies.find(p => p.id === selectedPolicy)?.vehicle.driver.licenseNumber}</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-400">Expected Firm Fee</span>
-                            <span className="text-white">{insurancePolicies.find(p => p.id === selectedPolicy)?.expectedFirmFee}</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-400">Final Settlement</span>
-                            <span className="text-white">{insurancePolicies.find(p => p.id === selectedPolicy)?.finalSettlement}</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="text-gray-400">Final Firm Fee</span>
-                            <span className="text-white">{insurancePolicies.find(p => p.id === selectedPolicy)?.finalFirmFee}</span>
-                          </div>
-                        </>
-                      )}
-                    </div>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
               ) : (
