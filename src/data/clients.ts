@@ -40,35 +40,10 @@ export interface Client {
   vehicleDetails?: string
   accidentDescription?: string
   medicalTreatment?: string
-  // Vehicle Information
-  vehicle?: {
-    year: string
-    make: string
-    model: string
-    color: string
-    vin: string
-    licensePlate: string
-    isClientVehicle: boolean
-    driver: {
-      name: string
-      licenseNumber: string
-      insuranceProvider: string
-      policyNumber: string
-    }
-    owner: {
-      name: string
-      address: string
-      phone: string
-      relationship: string
-    }
-    passengers?: {
-      name: string
-      age: number
-      injuries?: string
-      seatPosition: string
-      isClient: boolean
-    }[]
-  }
+  
+  // Vehicle Information - Updated to array of vehicles
+  vehicles?: Vehicle[]
+  
   // Defendant Information
   defendant?: {
     name: string
@@ -78,33 +53,8 @@ export interface Client {
     licenseNumber: string
     insuranceProvider: string
     policyNumber: string
-    vehicle: {
-      year: string
-      make: string
-      model: string
-      color: string
-      vin: string
-      licensePlate: string
-      driver: {
-        name: string
-        licenseNumber: string
-        insuranceProvider: string
-        policyNumber: string
-      }
-      owner: {
-        name: string
-        address: string
-        phone: string
-        relationship: string
-      }
-      passengers?: {
-        name: string
-        age: number
-        injuries?: string
-        seatPosition: string
-      }[]
-    }
   }
+  
   // Existing fields
   email?: string
   phone?: string
@@ -154,6 +104,62 @@ export interface Client {
   }
 }
 
+// New Vehicle interface
+export interface Vehicle {
+  id: string
+  year: string
+  make: string
+  model: string
+  color: string
+  vin?: string
+  licensePlate?: string
+  isClient: boolean
+  vehicleType?: string
+  crashReportReference?: string
+  
+  // Owner information
+  owner: {
+    name: string
+    address?: string
+    phone?: string
+    email?: string
+    relationship?: string
+    personId?: string // Reference to a person in the case
+  }
+  
+  // Driver information
+  driver: {
+    name: string
+    licenseNumber?: string
+    insuranceProvider?: string
+    policyNumber?: string
+    email?: string
+    phone?: string
+    address?: string
+    personId?: string // Reference to a person in the case
+  }
+  
+  // Insurance information
+  insurancePolicies?: {
+    type: "auto" | "health" | "liability"
+    number: string
+    provider?: {
+      name: string
+      logo?: string
+    }
+  }[]
+  
+  // Passenger information
+  passengers?: {
+    name: string
+    age?: number
+    injuries?: string
+    seatPosition?: string
+    isClient?: boolean
+    personId?: string // Reference to a person in the case
+  }[]
+}
+
 export const clients: Client[] = [
   {
     id: 1,
@@ -197,45 +203,119 @@ export const clients: Client[] = [
     vehicleDetails: "2005. Dodge-   Vehicle T/L.   At home parked",
     accidentDescription: "Rear-ended at intersectionThe client was traveling on hwy 27 S in Frostproof when he struck the rear of a vehicle stalled on the road.   The car had been involved in prior accident, however, it had no lights on and it was 9 to 9:30 pm.k and back pain reported",
     medicalTreatment: "Client was taken via ambulance to Advent Health Hospital Avon Park.     He started to treat at Complete Care in Winter Haven.  He will be going for MRI to Akumin Winter Haven.",
-    // Vehicle Information
-    vehicle: {
-      year: "2005",
-      make: "Dodge",
-      model: "Ram 1500",
-      color: "Silver",
-      vin: "1D7HA18N85J123456",
-      licensePlate: "AL-ABC123",
-      isClientVehicle: true,
-      driver: {
-        name: "John Smith",
-        licenseNumber: "AL-12345678",
-        insuranceProvider: "State Farm",
-        policyNumber: "SF-987654321"
-      },
-      owner: {
-        name: "John Smith",
-        address: "1234 Oak Street, Mobile, AL 36602",
-        phone: "+1 (251) 213-0267",
-        relationship: "Self"
-      },
-      passengers: [
-        {
-          name: "Sarah Smith",
-          age: 32,
-          injuries: "Minor neck pain",
-          seatPosition: "Front passenger",
-          isClient: false
+    
+    // Updated Vehicle Information as an array
+    vehicles: [
+      {
+        id: "v1",
+        year: "2005",
+        make: "Dodge",
+        model: "Ram 1500",
+        color: "Silver",
+        vin: "1D7HA18N85J123456",
+        licensePlate: "AL-ABC123",
+        isClient: true,
+        vehicleType: "Pickup Truck",
+        crashReportReference: "crash-report-123",
+        owner: {
+          name: "John Smith",
+          address: "1234 Oak Street, Mobile, AL 36602",
+          phone: "+1 (251) 213-0267",
+          email: "john.smith@example.com",
+          relationship: "Self",
+          personId: "p1" // Reference to John Smith
         },
-        {
-          name: "Michael Smith",
-          age: 8,
-          injuries: "None reported",
-          seatPosition: "Rear right",
-          isClient: false
-        }
-      ]
-    },
-    // Defendant Information
+        driver: {
+          name: "John Smith",
+          licenseNumber: "AL-12345678",
+          insuranceProvider: "State Farm",
+          policyNumber: "SF-987654321",
+          email: "john.smith@example.com",
+          phone: "+1 (251) 213-0267",
+          address: "1234 Oak Street, Mobile, AL 36602",
+          personId: "p1" // Reference to John Smith
+        },
+        insurancePolicies: [
+          {
+            type: "auto",
+            number: "AUTO-12345-X89",
+            provider: {
+              name: "State Farm",
+              logo: "/statefarm.jpg"
+            }
+          }
+        ],
+        passengers: [
+          {
+            name: "Sarah Smith",
+            age: 32,
+            injuries: "Minor neck pain",
+            seatPosition: "Front passenger",
+            isClient: false,
+            personId: "p2" // Reference to Sarah Smith
+          },
+          {
+            name: "Michael Smith",
+            age: 8,
+            injuries: "None reported",
+            seatPosition: "Rear right",
+            isClient: false,
+            personId: "p3" // Reference to Michael Smith
+          }
+        ]
+      },
+      {
+        id: "v2",
+        year: "2018",
+        make: "Toyota",
+        model: "Camry",
+        color: "Blue",
+        vin: "4T1C11AK7JU123456",
+        licensePlate: "AL-XYZ789",
+        isClient: false,
+        vehicleType: "Sedan",
+        crashReportReference: "crash-report-123",
+        owner: {
+          name: "Jane Doe",
+          address: "5678 Maple Avenue, Mobile, AL 36603",
+          phone: "+1 (251) 555-9876",
+          email: "jane.doe@example.com",
+          relationship: "Self",
+          personId: "p4" // Reference to Jane Doe
+        },
+        driver: {
+          name: "Jane Doe",
+          licenseNumber: "AL-87654321",
+          insuranceProvider: "Progressive",
+          policyNumber: "PRG-123456789",
+          email: "jane.doe@example.com",
+          phone: "+1 (251) 555-9876",
+          address: "5678 Maple Avenue, Mobile, AL 36603",
+          personId: "p4" // Reference to Jane Doe
+        },
+        insurancePolicies: [
+          {
+            type: "auto",
+            number: "PRG-123456789",
+            provider: {
+              name: "Progressive",
+              logo: "/Progressive-logo.png"
+            }
+          }
+        ],
+        passengers: [
+          {
+            name: "Robert Johnson",
+            age: 45,
+            injuries: "None reported",
+            seatPosition: "Front passenger",
+            personId: "p5" // Reference to Robert Johnson
+          }
+        ]
+      }
+    ],
+    
+    // Defendant Information - Updated to remove vehicle information
     defendant: {
       name: "Jane Doe",
       address: "5678 Maple Avenue, Mobile, AL 36603",
@@ -243,36 +323,9 @@ export const clients: Client[] = [
       dateOfBirth: "05/22/1990",
       licenseNumber: "AL-87654321",
       insuranceProvider: "Progressive",
-      policyNumber: "PRG-123456789",
-      vehicle: {
-        year: "2018",
-        make: "Toyota",
-        model: "Camry",
-        color: "Blue",
-        vin: "4T1C11AK7JU123456",
-        licensePlate: "AL-XYZ789",
-        driver: {
-          name: "Jane Doe",
-          licenseNumber: "AL-87654321",
-          insuranceProvider: "Progressive",
-          policyNumber: "PRG-123456789"
-        },
-        owner: {
-          name: "Jane Doe",
-          address: "5678 Maple Avenue, Mobile, AL 36603",
-          phone: "+1 (251) 555-9876",
-          relationship: "Self"
-        },
-        passengers: [
-          {
-            name: "Robert Johnson",
-            age: 45,
-            injuries: "None reported",
-            seatPosition: "Front passenger"
-          }
-        ]
-      }
+      policyNumber: "PRG-123456789"
     },
+    
     // Existing data
     email: "john.smith@example.com",
     phone: "+1 (251) 213-0267",

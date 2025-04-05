@@ -41,7 +41,7 @@ export default async function ClientDetailPage({ params }: PageProps) {
 
             {/* Support section */}
             <div className="mb-5">
-              <ClientSupport />
+              <ClientSupport client={client} />
             </div>
           </div>
         </div>
