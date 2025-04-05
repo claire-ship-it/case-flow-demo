@@ -1,6 +1,6 @@
 "use client"
 
-import { Link, ChevronDown, Plus, FileText, Pencil, Clock, CheckCircle2, AlertCircle, Gavel, Folders, Code, Camera, Search, Filter, DollarSign, FileCheck, Building2, User } from "lucide-react"
+import { Link, ChevronDown, Plus, FileText, Pencil, Clock, CheckCircle2, AlertCircle, Gavel, Folders, Code, Camera, Search, Filter, DollarSign, FileCheck, Building2, User, Mail, Phone, Calendar } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { Avatar } from "@/components/ui/avatar"
@@ -111,10 +111,48 @@ export function ClientSupport() {
   ]
 
   // Sample defendants data
-  const defendants = [
-    { id: 1, name: "John Smith", role: "Primary Defendant" },
-    { id: 2, name: "Jane Doe", role: "Secondary Defendant" },
-    { id: 3, name: "Robert Johnson", role: "Third Party Defendant" }
+  interface Defendant {
+    id: number
+    name: string
+    role: string
+    email?: string
+    phone?: string
+    dateOfBirth?: string
+    licenseNumber?: string
+    address?: string
+  }
+
+  const defendants: Defendant[] = [
+    { 
+      id: 1, 
+      name: "John Smith", 
+      role: "Primary Defendant",
+      email: "john.smith@example.com",
+      phone: "(555) 123-4567",
+      dateOfBirth: "05/15/1980",
+      licenseNumber: "DL123456789",
+      address: "123 Main St, Anytown, ST 12345"
+    },
+    { 
+      id: 2, 
+      name: "Jane Doe", 
+      role: "Secondary Defendant",
+      email: "jane.doe@example.com",
+      phone: "(555) 987-6543",
+      dateOfBirth: "08/22/1975",
+      licenseNumber: "DL987654321",
+      address: "456 Oak Ave, Somewhere, ST 67890"
+    },
+    { 
+      id: 3, 
+      name: "Robert Johnson", 
+      role: "Third Party Defendant",
+      email: "robert.j@example.com",
+      phone: "(555) 456-7890",
+      dateOfBirth: "11/30/1982",
+      licenseNumber: "DL456789123",
+      address: "789 Pine Rd, Elsewhere, ST 13579"
+    }
   ]
 
   // Sample medical request data
@@ -308,6 +346,27 @@ export function ClientSupport() {
       ]
     }
   ]
+
+  // Add this after the interface Defendant definition
+  interface DefendantPolicy {
+    defendantId: number;
+    policyId: number;
+  }
+
+  // Add this after the defendants array
+  const defendantPolicies: DefendantPolicy[] = [
+    { defendantId: 1, policyId: 1 }, // John Smith -> State Farm Insurance
+    { defendantId: 2, policyId: 2 }, // Jane Doe -> Progressive Insurance
+  ];
+
+  // Add this function before the return statement
+  const handleViewPolicy = (defendantId: number) => {
+    const policy = defendantPolicies.find(dp => dp.defendantId === defendantId);
+    if (policy) {
+      setActiveTab('insurance');
+      setSelectedPolicy(policy.policyId);
+    }
+  };
 
   return (
     <div className="bg-[#1E293B] rounded-lg overflow-hidden">
@@ -572,9 +631,9 @@ export function ClientSupport() {
                       selectedDefendant === defendant.id ? 'border-l-2 border-[#228BE6]' : ''
                     }`}
                   >
-                    <Avatar className="h-10 w-10 bg-[#4F378B] text-white">
-                      <span className="text-sm">{defendant.name.split(' ').map(n => n[0]).join('')}</span>
-                    </Avatar>
+                    <div className="h-10 w-10 bg-[#374151] rounded-full flex items-center justify-center text-[#E6E0E9]">
+                      👤
+                    </div>
                     <div className="ml-4">
                       <h3 className="text-[16px] font-medium text-[#E6E0E9]">{defendant.name}</h3>
                       <p className="text-[14px] text-[#E6E0E9]">{defendant.role}</p>
@@ -594,22 +653,57 @@ export function ClientSupport() {
             <div className="w-1/2">
               {selectedDefendant ? (
                 <div className="space-y-6">
-                  {/* Personal Information */}
-                  <div className="border-b border-[#5F6979] pb-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-[20px] font-medium text-white">Personal Information</h2>
-                      <ChevronDown size={20} className="text-[#D9D9D9]" />
-                    </div>
-                    {/* Add personal information fields here */}
-                  </div>
-
                   {/* Contact Information */}
                   <div className="border-b border-[#5F6979] pb-4">
                     <div className="flex items-center justify-between mb-4">
                       <h2 className="text-[20px] font-medium text-white">Contact Information</h2>
                       <ChevronDown size={20} className="text-[#D9D9D9]" />
                     </div>
-                    {/* Add contact information fields here */}
+                    <div className="mt-4 space-y-6">
+                      <div className="grid grid-cols-2 gap-6">
+                        <div className="space-y-4">
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-400">Email</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-white">{defendants.find(d => d.id === selectedDefendant)?.email}</span>
+                              <button className="text-blue-400 hover:text-blue-300">
+                                <Mail size={14} />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-400">Phone</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-white">{defendants.find(d => d.id === selectedDefendant)?.phone}</span>
+                              <button className="text-blue-400 hover:text-blue-300">
+                                <Phone size={14} />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-400">Date of Birth</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-white">{defendants.find(d => d.id === selectedDefendant)?.dateOfBirth}</span>
+                              <Calendar size={14} className="text-gray-400" />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <div className="flex justify-between items-center">
+                            <span className="text-gray-400">Driver's License</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-white">{defendants.find(d => d.id === selectedDefendant)?.licenseNumber}</span>
+                              <FileText size={14} className="text-gray-400" />
+                            </div>
+                          </div>
+                          <div className="flex flex-col gap-1">
+                            <span className="text-gray-400">Address</span>
+                            <span className="text-white text-right">{defendants.find(d => d.id === selectedDefendant)?.address}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Legal Information */}
@@ -618,16 +712,81 @@ export function ClientSupport() {
                       <h2 className="text-[20px] font-medium text-white">Legal Information</h2>
                       <ChevronDown size={20} className="text-[#D9D9D9]" />
                     </div>
-                    {/* Add legal information fields here */}
-                  </div>
+                    <div className="mt-4">
+                      {/* Defense Counsel Card */}
+                      <div className="bg-[#151F2D] rounded-lg p-4">
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="h-10 w-10 bg-[#374151] rounded-full flex items-center justify-center text-[#E6E0E9]">
+                            👨‍⚖️
+                          </div>
+                          <div>
+                            <h3 className="text-white font-medium">Defense Counsel</h3>
+                            <p className="text-gray-400 text-sm">Defendant Lawyer</p>
+                          </div>
+                        </div>
 
-                  {/* Insurance Information */}
-                  <div className="border-b border-[#5F6979] pb-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <h2 className="text-[20px] font-medium text-white">Insurance Information</h2>
-                      <ChevronDown size={20} className="text-[#D9D9D9]" />
+                        <div className="grid grid-cols-2 gap-6">
+                          {/* Left Column */}
+                          <div className="space-y-3">
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-400">First Name</span>
+                              <span className="text-white">Defendant</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-400">Last Name</span>
+                              <span className="text-white">Lawyer</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-400">Email</span>
+                              <div className="flex items-center gap-2">
+                                <a href="mailto:test@test.com" className="text-blue-400 hover:text-blue-300">test@test.com</a>
+                                <Mail size={14} className="text-blue-400" />
+                              </div>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-400">Phone</span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-white">44456554646</span>
+                                <Phone size={14} className="text-blue-400" />
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Right Column */}
+                          <div className="space-y-3">
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-400">Firm Name</span>
+                              <span className="text-white">Law Firm 1</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-400">Street Address</span>
+                              <span className="text-white">123 Main Street</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-400">City</span>
+                              <span className="text-white">Miami</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-gray-400">State</span>
+                              <span className="text-white">FL</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Insurance Policy Link Button */}
+                      {selectedDefendant && defendantPolicies.find(dp => dp.defendantId === selectedDefendant) && (
+                        <div className="mt-4">
+                          <button
+                            onClick={() => handleViewPolicy(selectedDefendant)}
+                            className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-[#2563EB] hover:bg-[#1D4ED8] rounded-lg text-white transition-colors"
+                          >
+                            <DollarSign size={16} />
+                            <span>View Associated Insurance Policy</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    {/* Add insurance information fields here */}
                   </div>
                 </div>
               ) : (
@@ -782,11 +941,9 @@ export function ClientSupport() {
                       </td>
                       <td className="p-4">
                         <div className="flex items-center gap-2">
-                          <Avatar className="h-6 w-6 bg-[#4F378B]">
-                            <span className="text-xs text-white">
-                              {task.responsibleParty.split(' ').map(n => n[0]).join('')}
-                            </span>
-                          </Avatar>
+                          <div className="h-6 w-6 bg-[#374151] rounded-full flex items-center justify-center text-[#E6E0E9]">
+                            👤
+                          </div>
                           <span className="text-white">{task.responsibleParty}</span>
                         </div>
                       </td>
@@ -870,11 +1027,9 @@ export function ClientSupport() {
                       </td>
                       <td className="p-4">
                         <div className="flex items-center gap-2">
-                          <Avatar className="h-6 w-6 bg-[#4F378B]">
-                            <span className="text-xs text-white">
-                              {log.user === 'System' ? 'SY' : log.user.split(' ').map(n => n[0]).join('')}
-                            </span>
-                          </Avatar>
+                          <div className="h-6 w-6 bg-[#374151] rounded-full flex items-center justify-center text-[#E6E0E9]">
+                            {log.user === 'System' ? '🤖' : '👤'}
+                          </div>
                           <span className="text-white">{log.user}</span>
                         </div>
                       </td>
