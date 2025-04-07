@@ -40,7 +40,6 @@ export function NavItem({ icon, label, href, active = false, badge = false }: Na
 export function Sidebar() {
   const pathname = usePathname()
   const isClientsPage = pathname === '/client'
-  const isHolyGrailPage = pathname?.startsWith('/holy-grail')
 
   return (
     <div className="absolute left-0 top-0 w-[235px] h-full bg-[#0F172A] rounded-md flex flex-col">
@@ -57,7 +56,7 @@ export function Sidebar() {
       </div>
 
       <nav className="p-5 space-y-1">
-        <div className="text-gray-400 text-sm mb-2">NAVIGATION</div>
+
         <NavItem 
           icon={<User size={16} />} 
           label="Clients" 
@@ -65,12 +64,6 @@ export function Sidebar() {
           active={isClientsPage}
         />
         <NavItem icon={<FileText size={16} />} label="Tasks" />
-        <NavItem 
-          icon={<BarChart2 size={16} />} 
-          label="Holy Grail" 
-          href="/holy-grail/1"
-          active={isHolyGrailPage}
-        />
       </nav>
 
       <div className="mt-auto p-5 border-t border-gray-800">

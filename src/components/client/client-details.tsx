@@ -626,7 +626,7 @@ export function ClientDetails({ client }: ClientDetailsProps) {
                       <div className="flex items-center gap-4">
                         <span className="text-gray-400">People Involved</span>
                         <span className="text-white">{client.crashReport.people.length} person(s)</span>
-                      </div>
+                        </div>
                       {expandedSections.people ? (
                         <ChevronDown className="w-4 h-4 text-gray-400" />
                       ) : (
@@ -638,28 +638,28 @@ export function ClientDetails({ client }: ClientDetailsProps) {
                       <div className="px-4 pb-4 space-y-4 border-t border-[#374151]">
                         {client.crashReport.people.map((person, index) => (
                           <div key={index} className="space-y-2 p-3 bg-[#151F2D] rounded-md mt-3">
-                            <div className="flex justify-between items-center">
-                              <span className="text-gray-400">Name</span>
+                                      <div className="flex justify-between items-center">
+                                        <span className="text-gray-400">Name</span>
                               <span className="text-white">{person.name}</span>
-                            </div>
-                            <div className="flex justify-between items-center">
+                                      </div>
+                                      <div className="flex justify-between items-center">
                               <span className="text-gray-400">Role</span>
                               <span className="text-white capitalize">{person.role}</span>
-                            </div>
+                                      </div>
                             {person.statements && person.statements.length > 0 && (
-                              <div className="flex flex-col gap-2">
+                                              <div className="flex flex-col gap-2">
                                 <span className="text-gray-400">Statement</span>
                                 <p className="text-white text-sm leading-6">{person.statements[0]}</p>
-                              </div>
-                            )}
+                                              </div>
+                                            )}
                             {person.injuries && person.injuries.length > 0 && (
-                              <div className="flex flex-col gap-2">
-                                <span className="text-gray-400">Injuries</span>
+                                              <div className="flex flex-col gap-2">
+                                                <span className="text-gray-400">Injuries</span>
                                 <p className="text-white text-sm leading-6">{person.injuries.join(', ')}</p>
-                              </div>
-                            )}
-                          </div>
-                        ))}
+                                              </div>
+                                            )}
+                                          </div>
+                                        ))}
                       </div>
                     )}
                   </div>
@@ -811,81 +811,81 @@ export function ClientDetails({ client }: ClientDetailsProps) {
 
         {activeTab === 'financial' && (
           <div className="w-full space-y-6">
-            {/* Summary Section */}
-            <div className="w-full bg-[#0E1826] rounded-[10px] p-6">
-              <div 
-                className="flex items-center justify-between cursor-pointer mb-4"
-                onClick={() => toggleSection('summary')}
-              >
+              {/* Summary Section */}
+              <div className="w-full bg-[#0E1826] rounded-[10px] p-6">
+                <div 
+                  className="flex items-center justify-between cursor-pointer mb-4"
+                  onClick={() => toggleSection('summary')}
+                >
                 <h2 className="text-[20px] font-medium text-white">Financial Summary</h2>
-                {expandedSections.summary ? (
-                  <ChevronDown className="w-5 h-5 text-gray-400" />
-                ) : (
-                  <ChevronRight className="w-5 h-5 text-gray-400" />
-                )}
-              </div>
-              {expandedSections.summary && (
-                <div className="space-y-4">
-                  <div className="bg-[#151F2D] p-4 rounded-lg">
-                    <div className="space-y-3">
-                      {/* Total Recovery */}
-                      <div className="flex justify-between items-center pb-3 border-b border-[#374151]">
-                        <span className="text-gray-400">Total Recovery</span>
+                  {expandedSections.summary ? (
+                    <ChevronDown className="w-5 h-5 text-gray-400" />
+                  ) : (
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                  )}
+                </div>
+                {expandedSections.summary && (
+                  <div className="space-y-4">
+                    <div className="bg-[#151F2D] p-4 rounded-lg">
+                      <div className="space-y-3">
+                        {/* Total Recovery */}
+                        <div className="flex justify-between items-center pb-3 border-b border-[#374151]">
+                          <span className="text-gray-400">Total Recovery</span>
                         <span className="text-white font-medium">
                           ${client.insurancePolicies.reduce((sum, policy) => {
                             const limit = parseFloat(policy.limit.replace(/[^0-9.-]+/g, ''));
                             return sum + limit;
                           }, 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
-                      </div>
-                      
-                      {/* Total Fees */}
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-400">Total Fees (33%)</span>
+                        </div>
+                        
+                        {/* Total Fees */}
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-400">Total Fees (33%)</span>
                         <span className="text-red-400">
                           -${(client.insurancePolicies.reduce((sum, policy) => {
                             const limit = parseFloat(policy.limit.replace(/[^0-9.-]+/g, ''));
                             return sum + limit;
                           }, 0) * 0.33).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
-                      </div>
-                      
-                      <div className="flex justify-between items-center pb-3 border-b border-[#374151]">
-                        <span className="text-gray-400">Recovery Minus Fees</span>
+                        </div>
+                        
+                        <div className="flex justify-between items-center pb-3 border-b border-[#374151]">
+                          <span className="text-gray-400">Recovery Minus Fees</span>
                         <span className="text-white">
                           ${(client.insurancePolicies.reduce((sum, policy) => {
                             const limit = parseFloat(policy.limit.replace(/[^0-9.-]+/g, ''));
                             return sum + limit;
                           }, 0) * 0.67).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
-                      </div>
-                      
-                      {/* Subtotal */}
-                      <div className="flex justify-between items-center pb-3 border-b border-[#374151]">
-                        <span className="text-gray-400">Subtotal</span>
+                        </div>
+                        
+                        {/* Subtotal */}
+                        <div className="flex justify-between items-center pb-3 border-b border-[#374151]">
+                          <span className="text-gray-400">Subtotal</span>
                         <span className="text-white font-medium">
                           ${(client.insurancePolicies.reduce((sum, policy) => {
                             const limit = parseFloat(policy.limit.replace(/[^0-9.-]+/g, ''));
                             return sum + limit;
                           }, 0) * 0.67).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
-                      </div>
-                      
-                      {/* Total Expenses */}
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <span className="text-gray-400">Total Expenses</span>
                         </div>
+                        
+                        {/* Total Expenses */}
+                        <div className="flex justify-between items-center">
+                          <div>
+                            <span className="text-gray-400">Total Expenses</span>
+                          </div>
                         <span className="text-red-400">
                           -${client.medicalProviders.reduce((sum, provider) => 
                             sum + provider.billingInfo.totalBilled, 0
                           ).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
-                      </div>
-                      
-                      {/* Client Payment Amount */}
-                      <div className="flex justify-between items-center pt-3 border-t border-[#374151]">
-                        <span className="text-white font-medium">Client Payment Amount</span>
+                        </div>
+                        
+                        {/* Client Payment Amount */}
+                        <div className="flex justify-between items-center pt-3 border-t border-[#374151]">
+                          <span className="text-white font-medium">Client Payment Amount</span>
                         <span className="text-green-400 text-xl font-semibold">
                           ${(client.insurancePolicies.reduce((sum, policy) => {
                             const limit = parseFloat(policy.limit.replace(/[^0-9.-]+/g, ''));
@@ -894,28 +894,28 @@ export function ClientDetails({ client }: ClientDetailsProps) {
                             sum + provider.billingInfo.totalBilled, 0
                           )).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
-            </div>
-
-            {/* Policy Section */}
-            <div className="w-full bg-[#0E1826] rounded-[10px] p-6">
-              <div 
-                className="flex items-center justify-between cursor-pointer mb-4"
-                onClick={() => toggleSection('policy')}
-              >
-                <h2 className="text-[20px] font-medium text-white">Insurance Policies</h2>
-                {expandedSections.policy ? (
-                  <ChevronDown className="w-5 h-5 text-gray-400" />
-                ) : (
-                  <ChevronRight className="w-5 h-5 text-gray-400" />
                 )}
               </div>
-              {expandedSections.policy && (
-                <div className="space-y-4">
+
+              {/* Policy Section */}
+              <div className="w-full bg-[#0E1826] rounded-[10px] p-6">
+                <div 
+                  className="flex items-center justify-between cursor-pointer mb-4"
+                  onClick={() => toggleSection('policy')}
+                >
+                  <h2 className="text-[20px] font-medium text-white">Insurance Policies</h2>
+                  {expandedSections.policy ? (
+                    <ChevronDown className="w-5 h-5 text-gray-400" />
+                  ) : (
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                  )}
+                </div>
+                {expandedSections.policy && (
+                  <div className="space-y-4">
                   {client.insurancePolicies.map((policy) => (
                     <div key={policy.id} className="bg-[#151F2D] p-4 rounded-lg">
                       <div className="flex justify-between items-center mb-3">
@@ -937,8 +937,8 @@ export function ClientDetails({ client }: ClientDetailsProps) {
                       </div>
                     </div>
                   ))}
-                </div>
-              )}
+                  </div>
+                )}
             </div>
 
             {/* Medical Bills Section */}
@@ -1067,19 +1067,19 @@ export function ClientDetails({ client }: ClientDetailsProps) {
                     <div className="space-y-3">
                       {client.medicalProviders.map((provider) => (
                         <div key={provider.id} className="flex justify-between items-center p-2 hover:bg-[#1A2433] rounded-lg">
-                          <div>
+                        <div>
                             <p className="text-white">{provider.name}</p>
                             <p className="text-gray-400 text-sm">{provider.type}</p>
-                          </div>
-                          <div className="text-right">
+                        </div>
+                        <div className="text-right">
                             <p className="text-white">
                               ${provider.billingInfo.totalBilled.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </p>
                             <p className="text-red-400 text-sm">
                               Owes: ${provider.billingInfo.outstandingBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                             </p>
-                          </div>
                         </div>
+                      </div>
                       ))}
                     </div>
                   </div>

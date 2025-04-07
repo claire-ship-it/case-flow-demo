@@ -5,6 +5,7 @@ import * as Collapsible from "@radix-ui/react-collapsible"
 import { cn } from "@/lib/utils"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { Defendant } from "@/data/clients"
 
 interface Provider {
   name: string
@@ -24,9 +25,10 @@ interface Provider {
 
 interface InjuriesProps {
   providers: Provider[]
+  defendants: Defendant[]
 }
 
-export function Injuries({ providers = defaultProviders }: InjuriesProps) {
+export function Injuries({ providers = [], defendants = [] }: InjuriesProps) {
   const [openSections, setOpenSections] = useState<Set<number>>(new Set())
 
   const toggleSection = (index: number) => {
@@ -54,14 +56,25 @@ export function Injuries({ providers = defaultProviders }: InjuriesProps) {
       <h2 className="text-2xl font-semibold text-white">Defendants</h2>
 
       {/* Defendants Section */}
-      <div className="bg-[#1E293B] rounded-lg p-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-[#0071DC] to-[#0059B3] rounded-full flex items-center justify-center text-xl">
-            🚛
+      {defendants.map((defendant, index) => (
+        <div key={index} className="bg-[#1E293B] rounded-lg p-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-[#0071DC] to-[#0059B3] rounded-full flex items-center justify-center text-xl">
+              🚛
+            </div>
+            <div>
+              <h3 className="text-lg font-medium text-white">{defendant.name}</h3>
+              <p className="text-sm text-gray-400">{defendant.role}</p>
+            </div>
           </div>
-          <h3 className="text-lg font-medium text-white">Walmart-Transportation LLC</h3>
+          {defendant.defenseCounsel && (
+            <div className="mt-2 text-sm text-gray-300">
+              <p>Defense Counsel: {defendant.defenseCounsel.name}</p>
+              <p>Firm: {defendant.defenseCounsel.firmName}</p>
+            </div>
+          )}
         </div>
-      </div>
+      ))}
 
       {/* Medical Providers */}
       <div className="flex items-center justify-between">
@@ -145,62 +158,3 @@ export function Injuries({ providers = defaultProviders }: InjuriesProps) {
     </div>
   )
 }
-
-const defaultProviders: Provider[] = [
-  {
-    name: "Advent Health Hospital-Fletcher",
-    details: {
-      date: "March 15, 2024",
-      provider: "Advent Health Hospital-Fletcher",
-      description: "Initial emergency room visit following the motor vehicle collision with Walmart Transportation LLC semi-truck. Patient presented with acute injuries and was evaluated by the ER team.",
-      injuries: [
-        "Cervical strain, acute",
-        "Injury of head",
-        "Epistaxis (nosebleed)",
-        "Muscle strain of the chest wall"
-      ],
-      recommendations: "The attending provider, Jamie Lynn Kazar, PA-C, recommended a treatment plan that included muscle relaxers and ibuprofen for pain management. Ms. Walker was advised to follow up with her primary care provider within the next 2-3 days.",
-      additionalNotes: "Initial imaging studies were performed to rule out acute trauma. Patient was discharged with prescribed medications and specific follow-up instructions. All documentation and billing records are available in the attached reports."
-    }
-  },
-  {
-    name: "Advanced Wellness & Rehabilitation Center",
-    details: {
-      date: "March 18, 2024",
-      provider: "Advanced Wellness & Rehabilitation Center",
-      description: "Patient began comprehensive physical therapy and rehabilitation program. Initial evaluation revealed significant cervical and thoracic dysfunction with associated muscular guarding and restricted range of motion.",
-      injuries: [
-        "Persistent cervical strain",
-        "Post-traumatic headaches",
-        "Thoracic muscle strain"
-      ],
-      recommendations: "Treatment plan includes physical therapy sessions 3 times per week for 4 weeks, focusing on manual therapy, therapeutic exercises, and neuromuscular re-education. Patient was also provided with a home exercise program to complement in-clinic treatments.",
-      additionalNotes: "Patient reports consistent 7/10 pain levels in cervical region with radiation into bilateral upper trapezius. Treatment response has been positive with noted improvements in range of motion following each session."
-    }
-  },
-  {
-    name: "Tampa Bay Imaging",
-    details: {
-      date: "March 20, 2024",
-      provider: "Tampa Bay Imaging",
-      description: "Comprehensive diagnostic imaging session to evaluate the extent of injuries sustained in the MVA. Multiple studies were performed including cervical spine MRI and brain MRI with and without contrast.",
-      recommendations: "MRI studies revealed evidence of cervical disc bulging at C5-C6 with mild neural foraminal narrowing. Brain MRI showed no acute intracranial abnormalities but noted soft tissue swelling consistent with trauma.",
-      additionalNotes: "Follow-up imaging may be necessary in 6-8 weeks to monitor healing progress. Complete radiological reports have been forwarded to treating physicians for review and treatment planning."
-    }
-  },
-  {
-    name: "Genisis Brain Institute",
-    details: {
-      date: "March 25, 2024",
-      provider: "Genisis Brain Institute",
-      description: "Specialized neurological evaluation following head injury and persistent post-concussive symptoms. Comprehensive assessment included cognitive testing, balance assessment, and vestibular examination.",
-      injuries: [
-        "Post-concussive syndrome",
-        "Cervicogenic headaches",
-        "Vestibular dysfunction"
-      ],
-      recommendations: "Patient will begin an intensive neurological rehabilitation program incorporating cognitive therapy, vestibular rehabilitation, and specialized exercises. Treatment frequency is recommended at 2-3 times per week for 6-8 weeks.",
-      additionalNotes: "Patient demonstrates significant symptoms consistent with post-concussive syndrome, including persistent headaches, dizziness, and cognitive fog. Prognosis is good with appropriate treatment adherence."
-    }
-  }
-]

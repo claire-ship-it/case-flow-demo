@@ -5,20 +5,33 @@ import { Avatar } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { MessageSquare } from "lucide-react"
 import { Chat } from "./chat"
+import { Client } from "@/data/clients"
+import Link from "next/link"
 
 interface HeaderProps {
   client: {
+    id: number
     name: string
     avatarUrl?: string
     dateOfLoss: string
     defenseAttorney: string
-    biLimit: string
-    umLimit: string
+    biLimit: number
+    umLimit: number
   }
 }
 
 export function Header({ client }: HeaderProps) {
   const [isChatOpen, setIsChatOpen] = useState(false)
+
+  // Format currency values
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(value)
+  }
 
   return (
     <>
@@ -36,7 +49,12 @@ export function Header({ client }: HeaderProps) {
                   </div>
                 )}
               </Avatar>
-              <span className="text-xl font-semibold text-white">{client.name}</span>
+              <Link 
+                href={`/client/${client.id}`}
+                className="text-xl font-semibold text-white hover:text-blue-400 transition-colors"
+              >
+                {client.name}
+              </Link>
             </div>
 
             {/* Center section - Case details */}
@@ -53,12 +71,12 @@ export function Header({ client }: HeaderProps) {
 
               <div className="flex flex-col items-center">
                 <span className="text-sm text-gray-400">BI Limit Final</span>
-                <span className="text-sm font-medium text-white">{client.biLimit}</span>
+                <span className="text-sm font-medium text-white">{formatCurrency(client.biLimit)}</span>
               </div>
 
               <div className="flex flex-col items-center">
                 <span className="text-sm text-gray-400">UM Limit Final</span>
-                <span className="text-sm font-medium text-white">{client.umLimit}</span>
+                <span className="text-sm font-medium text-white">{formatCurrency(client.umLimit)}</span>
               </div>
             </div>
 

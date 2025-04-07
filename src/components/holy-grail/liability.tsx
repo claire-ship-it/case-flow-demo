@@ -5,18 +5,8 @@ interface LiabilityProps {
 }
 
 export function Liability({ liabilityStatement }: LiabilityProps) {
-  // Default liability statement if none provided
-  const defaultStatement = `Delmarie Walker was driving her vehicle when she was sideswept by a semi-truck operated by Walmart-Transportation LLC.
-
-The impact caused Ms. Walker to veer off the road and come to a stop.
-
-She sustained injuries as a result of the crash.
-
-Based on the above, it is clear that Walmart-Transportation LLC acted negligently and was the sole and proximate cause of the crash, which resulted in the personal injuries to my client.
-
-No liability rests with our client, Ms. Walker who was a driver that was properly restrained and abiding by all relevant laws.`
-
-  const statement = liabilityStatement || defaultStatement
+  // Format the liability statement with proper line breaks, avoiding breaks after "Mr."
+  const formattedStatement = liabilityStatement?.split(/(?<=\. )(?!Mr\.)/).filter(Boolean) || []
 
   return (
     <div className="h-full">
@@ -43,9 +33,9 @@ No liability rests with our client, Ms. Walker who was a driver that was properl
         </div>
         
         <div className="space-y-6 text-gray-300">
-          {statement.split('\n\n').map((paragraph, index) => (
+          {formattedStatement.map((paragraph, index) => (
             <p key={index} className="text-base leading-relaxed">
-              {paragraph}
+              {paragraph.trim()}
             </p>
           ))}
         </div>

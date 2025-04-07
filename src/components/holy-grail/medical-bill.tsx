@@ -18,7 +18,7 @@ interface MedicalBillsProps {
   bills: MedicalBill[]
 }
 
-export function MedicalBills({ bills = defaultBills }: MedicalBillsProps) {
+export function MedicalBills({ bills }: MedicalBillsProps) {
   // Calculate totals
   const totals = bills.reduce(
     (acc, bill) => ({

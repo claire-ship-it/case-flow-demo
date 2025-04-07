@@ -1,4 +1,4 @@
-import { Search, Settings, ChevronDown, Filter } from "lucide-react"
+import { Search, Settings, ChevronDown, Filter, BarChart2 } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -77,11 +77,20 @@ export default function CaseManagementDashboard() {
                 {clients.map((client: Client) => (
                   <tr key={client.id} className="border-b border-gray-700">
                     <td className="p-4 text-gray-300">
-                      <Link href={`/client/${client.id}`} className="flex items-center hover:text-blue-400">
-                        <IncidentIcon type={client.incidentType} />
-                        <PersonEmoji gender={client.gender} fallback={client.name.charAt(0)} />
-                        {client.name}
-                      </Link>
+                      <div className="flex items-center gap-2">
+                        <Link href={`/client/${client.id}`} className="flex items-center hover:text-blue-400">
+                          <IncidentIcon type={client.incidentType} />
+                          <PersonEmoji gender={client.gender} fallback={client.name.charAt(0)} />
+                          {client.name}
+                        </Link>
+                        <Link 
+                          href={`/holy-grail/${client.id}`}
+                          className="flex items-center gap-1 px-2 py-1 text-xs bg-[#3A3F5F] text-white rounded hover:bg-[#4A4F6F] transition-colors"
+                        >
+                          <BarChart2 size={12} />
+                          <span>Holy Grail</span>
+                        </Link>
+                      </div>
                     </td>
                     <td className="p-4 text-gray-300">{client.dateOfLoss}</td>
                     <td className="p-4 text-center">

@@ -984,7 +984,7 @@ export const clients: Client[] = [
           statements: ["I thought I had enough time to make it through the intersection."]
         }
       ],
-      liabilityStatement: "Based on witness statements and physical evidence, the defendant is at fault for running a red light and causing the collision.",
+      liabilityStatement: "The subject crash occurred on March 15, 2024, at approximately 10:30 AM, at the intersection of Fletcher Avenue and Bruce B Downs Boulevard. Vehicle 1, operated by Emily Parker (the defendant), was traveling northbound on Bruce B Downs Boulevard, while Vehicle 2, driven by John Smith, was traveling eastbound on Fletcher Avenue in the through lane. The defendant failed to stop at a red light, proceeding through the intersection and causing a T-bone collision with Mr. Smith's vehicle. The defendant was cited for failing to stop at a red light and careless driving. Mr. Smith was properly restrained, operating his vehicle lawfully with a green light, and no citations were issued against him. Liability rests solely with the defendant due to their failure to stop at the red light, and no liability rests with John Smith.",
       countyOfIncident: "Hillsborough"
     }
   }
