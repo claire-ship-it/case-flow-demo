@@ -1,9 +1,55 @@
 export interface Client {
   id: number
   name: string
+  email: string
+  phone: string
+  address: string | "homeless"
   dateOfLoss: string
+  caseNumber: string
+  status: string
   dateOfBirth: string
   caseManager: string
+  ssn: string
+  maritalStatus: "single" | "married" | "divorced" | "widowed"
+  spouseName?: string
+  defendants: Defendant[]
+  insurancePolicies: InsurancePolicy[]
+  vehicles: Vehicle[]
+  medicalProviders: MedicalProvider[]
+  medicalRequests: {
+    id: number
+    type: string
+    provider: string
+    requestedBy: string
+    requestedDate: string
+    status: string
+    notes: string
+  }[]
+  tasks: {
+    id: number
+    title: string
+    dueDate: string | null
+    responsible: {
+      name: string
+      role: string
+      avatar: string
+    }
+    status: string
+  }[]
+  caseLogs: {
+    id: number
+    title: string
+    notes: string
+    document: string
+    date: string
+    type: string
+  }[]
+  documents: {
+    id: number
+    title: string
+    description: string
+    icon: string
+  }[]
   leadAttorney: string
   paralegal: string
   progress: number
@@ -17,10 +63,6 @@ export interface Client {
     paralegalGender: "male" | "female"
   }
   // Personal Information
-  ssn: string
-  address: string | "homeless"
-  maritalStatus: "single" | "married" | "divorced" | "widowed"
-  spouseName?: string
   education: string
   hasFelon: boolean
   liveInRelativeName?: string
@@ -40,41 +82,18 @@ export interface Client {
   vehicleDetails?: string
   accidentDescription?: string
   medicalTreatment?: string
-  
-  // Vehicle Information - Updated to array of vehicles
-  vehicles?: Vehicle[]
-  
-  // Defendant Information
-  defendant?: {
-    name: string
-    address: string
-    phone: string
-    dateOfBirth: string
-    licenseNumber: string
-    insuranceProvider: string
-    policyNumber: string
-  }
-  
-  // Existing fields
-  email?: string
-  phone?: string
-  statusOfLimitation?: string
-  caseType?: string
-  shortmedicalnarrative?: string
-  insurancePolicies?: {
-    type: "auto" | "health" | "liability"
-    number: string
-    provider?: {
-      name: string
-      logo: string
-    }
-  }[]
-  recentTreatments?: {
+  statusOfLimitation: string
+  shortmedicalnarrative: string
+  recentTreatments: {
+    date: string
     provider: string
     type: string
-    date: string
+    description: string
   }[]
-  crashReport?: {
+  crashReport: {
+    narrative: {
+      accidentDescription: string
+    }
     documentLink: string
     reportingOfficer: {
       name: string
@@ -86,335 +105,887 @@ export interface Client {
       description: string
       severity: string
     }[]
-    narrative: {
-      summary: string
-      weatherConditions: string
-      roadConditions: string
-      timeOfDay: string
-      accidentDescription: string
-    }
     people: {
-      role: "driver" | "passenger" | "witness"
       name: string
-      statement?: string
-      injuries?: string
+      role: string
+      injuries: string[]
+      statements: string[]
     }[]
     liabilityStatement: string
     countyOfIncident: string
   }
 }
 
-// New Vehicle interface
 export interface Vehicle {
-  id: string
+  id: number
   year: string
   make: string
   model: string
   color: string
-  vin?: string
-  licensePlate?: string
+  vin: string
+  licensePlate: string
+  vehicleType: 'car' | 'truck' | 'motorcycle' | 'van'
   isClient: boolean
-  vehicleType?: string
-  crashReportReference?: string
-  
-  // Owner information
-  owner: {
-    name: string
-    address?: string
-    phone?: string
-    email?: string
-    relationship?: string
-    personId?: string // Reference to a person in the case
-  }
-  
-  // Driver information
   driver: {
     name: string
-    licenseNumber?: string
+    licenseNumber: string
+    phone?: string
+    email?: string
+    address?: string
     insuranceProvider?: string
     policyNumber?: string
-    email?: string
-    phone?: string
-    address?: string
-    personId?: string // Reference to a person in the case
   }
-  
-  // Insurance information
-  insurancePolicies?: {
-    type: "auto" | "health" | "liability"
-    number: string
-    provider?: {
-      name: string
-      logo?: string
-    }
-  }[]
-  
-  // Passenger information
-  passengers?: {
+  owner: {
     name: string
-    age?: number
-    injuries?: string
-    seatPosition?: string
-    isClient?: boolean
-    personId?: string // Reference to a person in the case
-  }[]
+    relationship: string
+    phone?: string
+    email?: string
+    address?: string
+  }
+  insurancePolicies?: InsurancePolicy[]
+}
+
+export interface Defendant {
+  id: number
+  name: string
+  role: string
+  address: string
+  phone: string
+  email?: string
+  dateOfBirth: string
+  licenseNumber: string
+  insuranceProvider: string
+  policyNumber: string
+  defenseCounsel?: {
+    name: string
+    firmName: string
+    address: string
+    phone: string
+    email: string
+  }
+}
+
+export interface InsurancePolicy {
+  id: number
+  type: "UM" | "BI" | "PIP"
+  policyType: "UM" | "BI" | "PIP"
+  provider: {
+    name: string
+    logo: string
+    type?: string
+  }
+  policyNumber: string
+  claimNumber: string
+  limit: string
+  expectedSettlement: string
+  expectedFirmFee: string
+  finalSettlement?: string
+  finalFirmFee?: string
+  adjuster: {
+    name: string
+    role: string
+    phone: string
+    email: string
+  }
+  contact: {
+    address: string
+    phone: string
+    email: string
+    fax?: string
+  }
+  vehicle: {
+    year: string
+    make: string
+    model: string
+    color: string
+    vin: string
+    licensePlate: string
+    driver: {
+      name: string
+      licenseNumber: string
+    }
+  }
+  defendant: {
+    name: string
+    role: string
+  }
+}
+
+export interface MedicalProvider {
+  id: number;
+  name: string;
+  type: string;
+  address: string;
+  phone: string;
+  fax?: string;
+  billingInfo: {
+    accountNumber: string;
+    totalBilled: number;
+    totalPaid: number;
+    outstandingBalance: number;
+    lastPaymentDate?: string;
+  };
+  visits: {
+    id: number;
+    date: string;
+    type: string;
+    notes?: string;
+    billedAmount: number;
+    paidAmount: number;
+    status: 'pending' | 'paid' | 'denied';
+    facility: {
+      name: string;
+      department: string;
+      level?: string;
+      address: string;
+      phone: string;
+      fax: string;
+      email: string;
+    };
+    physician: {
+      name: string;
+      specialty: string;
+      credentials: string[];
+    };
+    treatmentAreas: {
+      name: string;
+      color: "blue" | "purple" | "green" | "orange";
+    }[];
+    summary: string;
+    description: string;
+    cptCodes: {
+      code: string;
+      description: string;
+      amount: number;
+    }[];
+    documents: {
+      type: "record" | "bill";
+      name: string;
+      date: string;
+      link: string;
+    }[];
+  }[];
+  medicalRecords: {
+    id: number;
+    date: string;
+    provider: string;
+    type: string;
+    description: string;
+    injuries: string[];
+    recommendations: string;
+    additionalNotes?: string;
+    billing?: {
+      id: number;
+      date: string;
+      originalBalance: number;
+      insurancePayment: number;
+      insuranceAdjustment: number;
+      firmAdjustment: number;
+      outstandingBalance: number;
+      cptCodes: {
+        code: string;
+        description: string;
+        amount: number;
+      }[];
+      documents: {
+        type: "record" | "bill";
+        name: string;
+        date: string;
+        link: string;
+      }[];
+    };
+  }[];
 }
 
 export const clients: Client[] = [
   {
     id: 1,
     name: "John Smith",
-    dateOfBirth: "03/15/1985",
-    dateOfLoss: "01/15/2023",
-    caseManager: "Michelle O'bonnon",
-    leadAttorney: "Craig Astrin",
-    paralegal: "Michelle O'bonnon",
-    progress: 46,
+    email: "john.smith@email.com",
+    phone: "(813) 555-1234",
+    address: "123 Main St, Tampa, FL 33601",
+    dateOfLoss: "03/15/2024",
+    caseNumber: "2024-001",
+    status: "active",
+    dateOfBirth: "01/15/1985",
+    caseManager: "Sarah Wilson",
+    ssn: "XXX-XX-1234",
+    maritalStatus: "married",
+    spouseName: "Jane Smith",
+    leadAttorney: "Michael Anderson",
+    paralegal: "Emily Davis",
+    progress: 25,
     tasksDue: 3,
     incidentType: "car",
-    stage: "Pre-suit",
     gender: "male",
+    stage: "Medical Treatment",
     team: {
       caseManagerGender: "female",
       leadAttorneyGender: "male",
-      paralegalGender: "female",
+      paralegalGender: "female"
     },
-    // Personal Information
-    ssn: "XXX-XX-4321",
-    address: "1234 Oak Street, Mobile, AL 36602",
-    maritalStatus: "married",
-    spouseName: "Sarah Smith",
     education: "Bachelor's Degree",
-    hasFelon: true,
-    liveInRelativeName: "John Smith",
+    hasFelon: false,
     emergencyContact: {
-      name: "Mary Smith",
-      relationship: "Mother",
-      phone: "(251) 555-0123",
-      address: "1235 Pine Street, Mobile, AL 36602"
+      name: "Jane Smith",
+      relationship: "Spouse",
+      phone: "(813) 555-5678",
+      address: "123 Main St, Tampa, FL 33601"
     },
-    primaryPhone: "+1 (251) 213-0267",
-    backupPhone: "+1 (251) 213-0268",
-    primaryEmail: "john.smith@example.com",
-    backupEmail: "john.smith.backup@example.com",
-    clientSource: "Website",
-    referralPerson: "Dr. James Wilson",
-    // Client Perspective
-    vehicleDetails: "2005. Dodge-   Vehicle T/L.   At home parked",
-    accidentDescription: "Rear-ended at intersectionThe client was traveling on hwy 27 S in Frostproof when he struck the rear of a vehicle stalled on the road.   The car had been involved in prior accident, however, it had no lights on and it was 9 to 9:30 pm.k and back pain reported",
-    medicalTreatment: "Client was taken via ambulance to Advent Health Hospital Avon Park.     He started to treat at Complete Care in Winter Haven.  He will be going for MRI to Akumin Winter Haven.",
-    
-    // Updated Vehicle Information as an array
-    vehicles: [
+    primaryPhone: "(813) 555-1234",
+    primaryEmail: "john.smith@email.com",
+    clientSource: "Referral",
+    referralPerson: "Tom Johnson",
+    vehicleDetails: "2020 Toyota Camry",
+    accidentDescription: "Rear-ended at intersection",
+    medicalTreatment: "Ongoing physical therapy and diagnostic imaging",
+    defendants: [
       {
-        id: "v1",
-        year: "2005",
-        make: "Dodge",
-        model: "Ram 1500",
-        color: "Silver",
-        vin: "1D7HA18N85J123456",
-        licensePlate: "AL-ABC123",
-        isClient: true,
-        vehicleType: "Pickup Truck",
-        crashReportReference: "crash-report-123",
-        owner: {
-          name: "John Smith",
-          address: "1234 Oak Street, Mobile, AL 36602",
-          phone: "+1 (251) 213-0267",
-          email: "john.smith@example.com",
-          relationship: "Self",
-          personId: "p1" // Reference to John Smith
-        },
-        driver: {
-          name: "John Smith",
-          licenseNumber: "AL-12345678",
-          insuranceProvider: "State Farm",
-          policyNumber: "SF-987654321",
-          email: "john.smith@example.com",
-          phone: "+1 (251) 213-0267",
-          address: "1234 Oak Street, Mobile, AL 36602",
-          personId: "p1" // Reference to John Smith
-        },
-        insurancePolicies: [
-          {
-            type: "auto",
-            number: "AUTO-12345-X89",
-            provider: {
-              name: "State Farm",
-              logo: "/statefarm.jpg"
-            }
-          }
-        ],
-        passengers: [
-          {
-            name: "Sarah Smith",
-            age: 32,
-            injuries: "Minor neck pain",
-            seatPosition: "Front passenger",
-            isClient: false,
-            personId: "p2" // Reference to Sarah Smith
-          },
-          {
-            name: "Michael Smith",
-            age: 8,
-            injuries: "None reported",
-            seatPosition: "Rear right",
-            isClient: false,
-            personId: "p3" // Reference to Michael Smith
-          }
-        ]
+        id: 1,
+        name: "Emily Parker",
+        role: "Primary Defendant",
+        address: "456 Oak Street, Orchard City, CA 90210",
+        phone: "(555) 234-5678",
+        email: "emily.parker@example.com",
+        dateOfBirth: "08/22/1990",
+        licenseNumber: "CA-87654321",
+        insuranceProvider: "State Farm",
+        policyNumber: "SF-123456789",
+        defenseCounsel: {
+          name: "Robert Smith",
+          firmName: "Smith & Associates",
+          address: "789 Legal Way, Orchard City, CA 90210",
+          phone: "(555) 345-6789",
+          email: "robert.smith@smithlaw.com"
+        }
       },
       {
-        id: "v2",
-        year: "2018",
-        make: "Toyota",
-        model: "Camry",
-        color: "Blue",
-        vin: "4T1C11AK7JU123456",
-        licensePlate: "AL-XYZ789",
-        isClient: false,
-        vehicleType: "Sedan",
-        crashReportReference: "crash-report-123",
-        owner: {
-          name: "Jane Doe",
-          address: "5678 Maple Avenue, Mobile, AL 36603",
-          phone: "+1 (251) 555-9876",
-          email: "jane.doe@example.com",
-          relationship: "Self",
-          personId: "p4" // Reference to Jane Doe
-        },
-        driver: {
-          name: "Jane Doe",
-          licenseNumber: "AL-87654321",
-          insuranceProvider: "Progressive",
-          policyNumber: "PRG-123456789",
-          email: "jane.doe@example.com",
-          phone: "+1 (251) 555-9876",
-          address: "5678 Maple Avenue, Mobile, AL 36603",
-          personId: "p4" // Reference to Jane Doe
-        },
-        insurancePolicies: [
-          {
-            type: "auto",
-            number: "PRG-123456789",
-            provider: {
-              name: "Progressive",
-              logo: "/Progressive-logo.png"
-            }
-          }
-        ],
-        passengers: [
-          {
-            name: "Robert Johnson",
-            age: 45,
-            injuries: "None reported",
-            seatPosition: "Front passenger",
-            personId: "p5" // Reference to Robert Johnson
-          }
-        ]
+        id: 2,
+        name: "Jason Miller",
+        role: "Secondary Defendant",
+        address: "789 Pine Avenue, Orchard City, CA 90210",
+        phone: "(555) 345-6789",
+        email: "jason.miller@example.com",
+        dateOfBirth: "03/15/1985",
+        licenseNumber: "CA-98765432",
+        insuranceProvider: "Progressive",
+        policyNumber: "PRG-456789123",
+        defenseCounsel: {
+          name: "Jennifer Wilson",
+          firmName: "Wilson Legal Group",
+          address: "321 Court Street, Orchard City, CA 90210",
+          phone: "(555) 456-7890",
+          email: "jennifer.wilson@wilsonlegal.com"
+        }
       }
     ],
-    
-    // Defendant Information - Updated to remove vehicle information
-    defendant: {
-      name: "Jane Doe",
-      address: "5678 Maple Avenue, Mobile, AL 36603",
-      phone: "+1 (251) 555-9876",
-      dateOfBirth: "05/22/1990",
-      licenseNumber: "AL-87654321",
-      insuranceProvider: "Progressive",
-      policyNumber: "PRG-123456789"
-    },
-    
-    // Existing data
-    email: "john.smith@example.com",
-    phone: "+1 (251) 213-0267",
-    statusOfLimitation: "1/22/2025 GMT",
-    caseType: "Auto Accident",
     insurancePolicies: [
       {
-        type: "auto",
-        number: "AUTO-12345-X89",
+        id: 1,
+        type: "UM",
+        policyType: "UM",
         provider: {
-          name: "State Farm",
-          logo: "/statefarm.jpg"
+          name: "Geico",
+          logo: "/logo/geico.png"
+        },
+        policyNumber: "GEICO-987654321",
+        claimNumber: "CLM-123456",
+        limit: "$50,000",
+        expectedSettlement: "$35,000",
+        expectedFirmFee: "$11,666",
+        adjuster: {
+          name: "David Thompson",
+          role: "Senior Claims Adjuster",
+          phone: "(555) 123-4567",
+          email: "david.thompson@geico.com"
+        },
+        contact: {
+          address: "123 Insurance Way, Orchard City, CA 90210",
+          phone: "(800) 555-1234",
+          email: "claims@geico.com",
+          fax: "(800) 555-5678"
+        },
+        vehicle: {
+          year: "2020",
+          make: "Dodge",
+          model: "Ram 1500",
+          color: "Black",
+          vin: "1D7HA18N85J123456",
+          licensePlate: "CA-APP123",
+          driver: {
+            name: "John Smith",
+            licenseNumber: "CA-12345678"
+          }
+        },
+        defendant: {
+          name: "John Smith",
+          role: "Client"
         }
       },
       {
-        type: "health",
-        number: "HLTH-98765-B12",
+        id: 2,
+        type: "BI",
+        policyType: "BI",
+        provider: {
+          name: "State Farm",
+          logo: "/statefarm-logo.png"
+        },
+        policyNumber: "SF-123456789",
+        claimNumber: "CLM-789012",
+        limit: "$100,000",
+        expectedSettlement: "$75,000",
+        expectedFirmFee: "$25,000",
+        adjuster: {
+          name: "Sarah Johnson",
+          role: "Claims Adjuster",
+          phone: "(555) 234-5678",
+          email: "sarah.johnson@statefarm.com"
+        },
+        contact: {
+          address: "456 Insurance Blvd, Orchard City, CA 90210",
+          phone: "(800) 555-2345",
+          email: "claims@statefarm.com",
+          fax: "(800) 555-6789"
+        },
+        vehicle: {
+          year: "2019",
+          make: "Toyota",
+          model: "Camry",
+          color: "Silver",
+          vin: "4T1C11AK7JU123456",
+          licensePlate: "CA-EMI456",
+          driver: {
+            name: "Emily Parker",
+            licenseNumber: "CA-87654321"
+          }
+        },
+        defendant: {
+          name: "Emily Parker",
+          role: "Primary Defendant"
+        }
+      },
+      {
+        id: 3,
+        type: "BI",
+        policyType: "BI",
         provider: {
           name: "Progressive",
-          logo: "/Progressive-logo.png"
+          logo: "/progressive-logo.png"
+        },
+        policyNumber: "PRG-456789123",
+        claimNumber: "CLM-345678",
+        limit: "$75,000",
+        expectedSettlement: "$50,000",
+        expectedFirmFee: "$16,666",
+        adjuster: {
+          name: "Michael Brown",
+          role: "Senior Claims Adjuster",
+          phone: "(555) 345-6789",
+          email: "michael.brown@progressive.com"
+        },
+        contact: {
+          address: "789 Insurance Ave, Orchard City, CA 90210",
+          phone: "(800) 555-3456",
+          email: "claims@progressive.com",
+          fax: "(800) 555-7890"
+        },
+        vehicle: {
+          year: "2021",
+          make: "Chevrolet",
+          model: "Suburban",
+          color: "White",
+          vin: "1GNSKJKC8MR123456",
+          licensePlate: "CA-JAS789",
+          driver: {
+            name: "Jason Miller",
+            licenseNumber: "CA-98765432"
+          }
+        },
+        defendant: {
+          name: "Jason Miller",
+          role: "Secondary Defendant"
         }
       }
     ],
-    shortmedicalnarrative: "Ms. Walker is currently undergoing extensive medical treatment, including neurological rehabilitation sessions involving photobiomodulation, neurofeedback, neuromuscular re-education, vestibular rehabilitation, electrical stimulation, and cognitive training. Additionally, Dr. Gruber has recommended surgical procedures including radiofrequency ablations with autologous stem cell transplantation and a right anterior cervical diskectomy at the C5-6 segment.",
+    vehicles: [
+      {
+        id: 1,
+        year: "2020",
+        make: "Dodge",
+        model: "Ram 1500",
+        color: "Black",
+        vin: "1D7HA18N85J123456",
+        licensePlate: "CA-APP123",
+        vehicleType: "truck",
+        isClient: true,
+        driver: {
+          name: "John Smith",
+          licenseNumber: "CA-12345678"
+        },
+        owner: {
+          name: "John Smith",
+          relationship: "Owner"
+        }
+      },
+      {
+        id: 2,
+        year: "2019",
+        make: "Toyota",
+        model: "Camry",
+        color: "Silver",
+        vin: "4T1C11AK7JU123456",
+        licensePlate: "CA-EMI456",
+        vehicleType: "car",
+        isClient: false,
+        driver: {
+          name: "Emily Parker",
+          licenseNumber: "CA-87654321"
+        },
+        owner: {
+          name: "Emily Parker",
+          relationship: "Owner"
+        }
+      },
+      {
+        id: 3,
+        year: "2021",
+        make: "Chevrolet",
+        model: "Suburban",
+        color: "White",
+        vin: "1GNSKJKC8MR123456",
+        licensePlate: "CA-JAS789",
+        vehicleType: "truck",
+        isClient: false,
+        driver: {
+          name: "Jason Miller",
+          licenseNumber: "CA-98765432"
+        },
+        owner: {
+          name: "Jason Miller",
+          relationship: "Owner"
+        }
+      }
+    ],
+    medicalProviders: [
+      {
+        id: 1,
+        name: "Advent Health Surgery Center",
+        type: "Surgery Center",
+        address: "3100 E. Fletcher Ave, Tampa, FL 33613",
+        phone: "(813) 971-6000",
+        fax: "(813) 971-6001",
+        billingInfo: {
+          accountNumber: "AHSC-12345",
+          totalBilled: 2500.00,
+          totalPaid: 0.00,
+          outstandingBalance: 2500.00
+        },
+        visits: [
+          {
+            id: 1,
+            date: "03/16/2024",
+            type: "Initial Consultation",
+            notes: "Post-accident evaluation and treatment planning",
+            billedAmount: 2500.00,
+            paidAmount: 0.00,
+            status: "pending",
+            facility: {
+              name: "Advent Health Surgery Center",
+              department: "Orthopedics",
+              level: "Outpatient",
+              address: "3100 E. Fletcher Ave, Tampa, FL 33613",
+              phone: "(813) 971-6000",
+              fax: "(813) 971-6001",
+              email: "records@adventhealth-fletcher.com"
+            },
+            physician: {
+              name: "Dr. Sarah Johnson, MD",
+              specialty: "Orthopedic Surgery",
+              credentials: ["Board Certified"]
+            },
+            treatmentAreas: [
+              { name: "Orthopedics", color: "blue" },
+              { name: "Surgery", color: "purple" }
+            ],
+            summary: "Initial consultation for post-accident evaluation and treatment planning",
+            description: "Patient presented with acute injuries following MVA. Recommended treatment plan developed.",
+            cptCodes: [
+              { code: "99203", description: "Office visit, new patient", amount: 250.00 }
+            ],
+            documents: []
+          }
+        ],
+        medicalRecords: []
+      },
+      {
+        id: 2,
+        name: "Active Wellness & Rehabilitation Center",
+        type: "Physical Therapy",
+        address: "2205 N West Shore Blvd, Tampa, FL 33607",
+        phone: "(813) 555-0123",
+        fax: "(813) 555-0124",
+        billingInfo: {
+          accountNumber: "AWR-67890",
+          totalBilled: 2000.00,
+          totalPaid: 0.00,
+          outstandingBalance: 2000.00
+        },
+        visits: [
+          {
+            id: 1,
+            date: "03/17/2024",
+            type: "Physical Therapy",
+            notes: "Initial assessment and treatment plan",
+            billedAmount: 500.00,
+            paidAmount: 0.00,
+            status: "pending",
+            facility: {
+              name: "Active Wellness & Rehabilitation Center",
+              department: "Physical Therapy",
+              level: "Outpatient",
+              address: "2205 N West Shore Blvd, Tampa, FL 33607",
+              phone: "(813) 555-0123",
+              fax: "(813) 555-0124",
+              email: "records@activewellness.com"
+            },
+            physician: {
+              name: "Dr. Michael Chen, DPT",
+              specialty: "Physical Therapy",
+              credentials: ["Board Certified", "Manual Therapy Certified"]
+            },
+            treatmentAreas: [
+              { name: "Physical Therapy", color: "blue" },
+              { name: "Rehabilitation", color: "green" }
+            ],
+            summary: "Initial physical therapy evaluation and treatment plan",
+            description: "Patient began comprehensive physical therapy program for post-accident rehabilitation",
+            cptCodes: [
+              { code: "97110", description: "Therapeutic exercise", amount: 150.00 },
+              { code: "97140", description: "Manual therapy", amount: 150.00 }
+            ],
+            documents: []
+          },
+          {
+            id: 2,
+            date: "03/20/2024",
+            type: "Physical Therapy",
+            notes: "Follow-up session",
+            billedAmount: 500.00,
+            paidAmount: 0.00,
+            status: "pending",
+            facility: {
+              name: "Active Wellness & Rehabilitation Center",
+              department: "Physical Therapy",
+              level: "Outpatient",
+              address: "2205 N West Shore Blvd, Tampa, FL 33607",
+              phone: "(813) 555-0123",
+              fax: "(813) 555-0124",
+              email: "records@activewellness.com"
+            },
+            physician: {
+              name: "Dr. Michael Chen, DPT",
+              specialty: "Physical Therapy",
+              credentials: ["Board Certified", "Manual Therapy Certified"]
+            },
+            treatmentAreas: [
+              { name: "Physical Therapy", color: "blue" },
+              { name: "Rehabilitation", color: "green" }
+            ],
+            summary: "Follow-up physical therapy session",
+            description: "Continued physical therapy treatment focusing on range of motion and strength",
+            cptCodes: [
+              { code: "97110", description: "Therapeutic exercise", amount: 150.00 },
+              { code: "97140", description: "Manual therapy", amount: 150.00 }
+            ],
+            documents: []
+          },
+          {
+            id: 3,
+            date: "03/24/2024",
+            type: "Physical Therapy",
+            notes: "Progress evaluation",
+            billedAmount: 500.00,
+            paidAmount: 0.00,
+            status: "pending",
+            facility: {
+              name: "Active Wellness & Rehabilitation Center",
+              department: "Physical Therapy",
+              level: "Outpatient",
+              address: "2205 N West Shore Blvd, Tampa, FL 33607",
+              phone: "(813) 555-0123",
+              fax: "(813) 555-0124",
+              email: "records@activewellness.com"
+            },
+            physician: {
+              name: "Dr. Michael Chen, DPT",
+              specialty: "Physical Therapy",
+              credentials: ["Board Certified", "Manual Therapy Certified"]
+            },
+            treatmentAreas: [
+              { name: "Physical Therapy", color: "blue" },
+              { name: "Rehabilitation", color: "green" }
+            ],
+            summary: "Progress evaluation session",
+            description: "Assessment of treatment progress and adjustment of therapy plan",
+            cptCodes: [
+              { code: "97110", description: "Therapeutic exercise", amount: 150.00 },
+              { code: "97140", description: "Manual therapy", amount: 150.00 }
+            ],
+            documents: []
+          },
+          {
+            id: 4,
+            date: "03/27/2024",
+            type: "Physical Therapy",
+            notes: "Treatment session",
+            billedAmount: 500.00,
+            paidAmount: 0.00,
+            status: "pending",
+            facility: {
+              name: "Active Wellness & Rehabilitation Center",
+              department: "Physical Therapy",
+              level: "Outpatient",
+              address: "2205 N West Shore Blvd, Tampa, FL 33607",
+              phone: "(813) 555-0123",
+              fax: "(813) 555-0124",
+              email: "records@activewellness.com"
+            },
+            physician: {
+              name: "Dr. Michael Chen, DPT",
+              specialty: "Physical Therapy",
+              credentials: ["Board Certified", "Manual Therapy Certified"]
+            },
+            treatmentAreas: [
+              { name: "Physical Therapy", color: "blue" },
+              { name: "Rehabilitation", color: "green" }
+            ],
+            summary: "Treatment session",
+            description: "Continued physical therapy focusing on functional recovery",
+            cptCodes: [
+              { code: "97110", description: "Therapeutic exercise", amount: 150.00 },
+              { code: "97140", description: "Manual therapy", amount: 150.00 }
+            ],
+            documents: []
+          }
+        ],
+        medicalRecords: []
+      },
+      {
+        id: 3,
+        name: "Tampa Bay Imaging",
+        type: "Imaging Center",
+        address: "4600 N Habana Ave, Tampa, FL 33614",
+        phone: "(813) 555-0125",
+        fax: "(813) 555-0126",
+        billingInfo: {
+          accountNumber: "TBI-34567",
+          totalBilled: 3000.00,
+          totalPaid: 0.00,
+          outstandingBalance: 3000.00
+        },
+        visits: [
+          {
+            id: 1,
+            date: "03/15/2024",
+            type: "X-Ray",
+            notes: "Initial injury assessment",
+            billedAmount: 1000.00,
+            paidAmount: 0.00,
+            status: "pending",
+            facility: {
+              name: "Tampa Bay Imaging",
+              department: "Radiology",
+              level: "Advanced Imaging",
+              address: "4600 N Habana Ave, Tampa, FL 33614",
+              phone: "(813) 555-0125",
+              fax: "(813) 555-0126",
+              email: "records@tampabayimaging.com"
+            },
+            physician: {
+              name: "Dr. Emily Rodriguez, MD",
+              specialty: "Radiology",
+              credentials: ["Board Certified", "Neuroradiology Fellowship"]
+            },
+            treatmentAreas: [
+              { name: "Radiology", color: "blue" },
+              { name: "Diagnostic Imaging", color: "purple" }
+            ],
+            summary: "Initial diagnostic imaging for injury assessment",
+            description: "X-ray studies performed to evaluate acute injuries",
+            cptCodes: [
+              { code: "72040", description: "X-ray exam of neck spine", amount: 250.00 }
+            ],
+            documents: []
+          },
+          {
+            id: 2,
+            date: "03/18/2024",
+            type: "MRI",
+            notes: "Follow-up imaging for soft tissue damage",
+            billedAmount: 2000.00,
+            paidAmount: 0.00,
+            status: "pending",
+            facility: {
+              name: "Tampa Bay Imaging",
+              department: "Radiology",
+              level: "Advanced Imaging",
+              address: "4600 N Habana Ave, Tampa, FL 33614",
+              phone: "(813) 555-0125",
+              fax: "(813) 555-0126",
+              email: "records@tampabayimaging.com"
+            },
+            physician: {
+              name: "Dr. Emily Rodriguez, MD",
+              specialty: "Radiology",
+              credentials: ["Board Certified", "Neuroradiology Fellowship"]
+            },
+            treatmentAreas: [
+              { name: "Radiology", color: "blue" },
+              { name: "Diagnostic Imaging", color: "purple" }
+            ],
+            summary: "MRI for soft tissue evaluation",
+            description: "MRI studies performed to assess soft tissue damage and internal injuries",
+            cptCodes: [
+              { code: "72141", description: "MRI cervical spine w/o dye", amount: 1000.00 }
+            ],
+            documents: []
+          }
+        ],
+        medicalRecords: []
+      }
+    ],
+    medicalRequests: [
+      {
+        id: 1,
+        type: "Medical Records Request",
+        provider: "Advent Health Surgery Center",
+        requestedBy: "Emily Davis",
+        requestedDate: "03/16/2024",
+        status: "pending",
+        notes: "Initial records request sent"
+      }
+    ],
+    tasks: [
+      {
+        id: 1,
+        title: "Follow up on medical records request",
+        dueDate: "03/23/2024",
+        responsible: {
+          name: "Emily Davis",
+          role: "Paralegal",
+          avatar: "/avatars/emily.jpg"
+        },
+        status: "pending"
+      }
+    ],
+    caseLogs: [
+      {
+        id: 1,
+        title: "Initial Client Meeting",
+        notes: "Met with client to discuss case details and treatment plan",
+        document: "initial-meeting-notes.pdf",
+        date: "03/16/2024",
+        type: "meeting"
+      }
+    ],
+    documents: [
+      {
+        id: 1,
+        title: "Client Intake Form",
+        description: "Completed intake documentation",
+        icon: "📄"
+      },
+      {
+        id: 2,
+        title: "State Farm - Declaration Pages",
+        description: "Insurance policy declaration pages for Emily Parker's vehicle",
+        icon: "📋"
+      },
+      {
+        id: 3,
+        title: "Progressive - Declaration Pages",
+        description: "Insurance policy declaration pages for Jason Miller's vehicle",
+        icon: "📋"
+      },
+      {
+        id: 4,
+        title: "Geico - Declaration Pages",
+        description: "Insurance policy declaration pages for client's UM coverage",
+        icon: "📋"
+      },
+      {
+        id: 5,
+        title: "Medical Records Release",
+        description: "Signed authorization for release of medical records",
+        icon: "📝"
+      },
+      {
+        id: 6,
+        title: "Police Report",
+        description: "Official accident report from responding officers",
+        icon: "🚔"
+      }
+    ],
+    statusOfLimitation: "03/15/2026",
+    shortmedicalnarrative: "Client sustained multiple injuries including cervical strain, post-traumatic headaches, and thoracic muscle strain. Currently undergoing physical therapy and diagnostic imaging.",
     recentTreatments: [
       {
-        provider: "Complete Care Winter Haven",
+        date: "03/27/2024",
+        provider: "Active Wellness & Rehabilitation Center",
         type: "Physical Therapy",
-        date: "03/15/2024"
+        description: "Treatment session focusing on functional recovery"
       },
       {
-        provider: "Akumin Winter Haven",
-        type: "MRI Scan",
-        date: "03/10/2024"
+        date: "03/24/2024",
+        provider: "Active Wellness & Rehabilitation Center",
+        type: "Physical Therapy",
+        description: "Progress evaluation and adjustment of therapy plan"
       },
       {
-        provider: "Advent Health Hospital Avon Park",
-        type: "Emergency Care",
-        date: "03/01/2024"
+        date: "03/18/2024",
+        provider: "Tampa Bay Imaging",
+        type: "MRI",
+        description: "Follow-up imaging for soft tissue damage"
       }
     ],
     crashReport: {
-      documentLink: "https://example.com/crash-report-123.pdf",
+      narrative: {
+        accidentDescription: "Client was traveling eastbound on Fletcher Avenue when defendant ran a red light at the intersection with Bruce B Downs Boulevard, causing a T-bone collision. The impact occurred on the passenger side of client's vehicle. Client was wearing a seatbelt and airbags deployed. Emergency services were called to the scene."
+      },
+      documentLink: "/documents/crash-report-2024-001.pdf",
       reportingOfficer: {
-        name: "Officer Michael Johnson",
-        badge: "MPD-4567",
-        department: "Mobile Police Department"
+        name: "Officer Michael Rodriguez",
+        badge: "T-4567",
+        department: "Tampa Police Department"
       },
       violations: [
         {
-          code: "32-5A-350",
-          description: "Following Too Closely",
-          severity: "Class C Misdemeanor"
+          code: "316.074(1)",
+          description: "Failure to stop at a red light",
+          severity: "Moving Violation"
         },
         {
-          code: "32-5A-171",
-          description: "Failure to Yield Right of Way",
-          severity: "Class C Misdemeanor"
+          code: "316.1925(1)",
+          description: "Careless driving",
+          severity: "Moving Violation"
         }
       ],
-      narrative: {
-        summary: "Vehicle 1 rear-ended Vehicle 2 at intersection of Oak and Pine Street",
-        weatherConditions: "Clear",
-        roadConditions: "Dry",
-        timeOfDay: "Daylight",
-        accidentDescription: "V01 was traveling south on Oak Street and was approaching the intersection of Pine Street. V02 was traveling east on Pine Street and was stopped at the intersection of Oak Street. While traveling south D01 attempted to stop at the yellow light, however was unable to do so. As a result, V01 continued to travel in a southerly direction and collided with the rear end of V02. V01 was facing in a southerly direction on Pine Street prior to my arrival. V02 was facing east on Pine Street prior to my arrival."
-      },
       people: [
         {
-          role: "driver",
           name: "John Smith",
-          statement: "Light turned yellow, vehicle in front stopped suddenly",
-          injuries: "Neck and back pain reported"
+          role: "Driver",
+          injuries: ["Cervical strain", "Post-traumatic headaches", "Thoracic muscle strain"],
+          statements: ["I had the green light when the other car ran the red light and hit me."]
         },
         {
-          role: "driver",
-          name: "Jane Doe",
-          statement: "Stopped at yellow light, was hit from behind",
-          injuries: "None reported"
-        },
-        {
-          role: "witness",
-          name: "Tom Wilson",
-          statement: "Saw rear vehicle following too closely before collision"
+          name: "Emily Parker",
+          role: "Driver",
+          injuries: ["None reported"],
+          statements: ["I thought I had enough time to make it through the intersection."]
         }
       ],
-      liabilityStatement: "Based on physical evidence and witness statements, Vehicle 1 appears to be at fault",
-      countyOfIncident: "Mobile County"
-    },
-  },
-  // ... rest of the clients array
+      liabilityStatement: "Based on witness statements and physical evidence, the defendant is at fault for running a red light and causing the collision.",
+      countyOfIncident: "Hillsborough"
+    }
+  }
 ] 

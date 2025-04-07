@@ -25,10 +25,16 @@ const getTeamMemberEmoji = (gender: "male" | "female", role: "caseManager" | "at
   return emojiMap[role][gender]
 }
 
-// Helper function to format SOL date
-const formatSOLDate = (dateString: string | undefined) => {
-  if (!dateString) return "N/A"
-  return dateString.split(" ")[0] // Take only the date part before the timezone
+// Helper function to calculate SOL date (2 years from date of loss)
+const calculateSOLDate = (dateOfLoss: string): string => {
+  const lossDate = new Date(dateOfLoss)
+  const solDate = new Date(lossDate)
+  solDate.setFullYear(solDate.getFullYear() + 2)
+  return solDate.toLocaleDateString('en-US', { 
+    year: 'numeric', 
+    month: '2-digit', 
+    day: '2-digit' 
+  })
 }
 
 export function ClientSidebar({ client }: ClientSidebarProps) {
@@ -96,7 +102,7 @@ export function ClientSidebar({ client }: ClientSidebarProps) {
           <div key={index} className="flex items-center">
             <CreditCard className="h-5 w-5 text-gray-400 mr-4" />
             <span className="text-gray-400 w-32">{policy.type.charAt(0).toUpperCase() + policy.type.slice(1)} Policy</span>
-            <span className="text-white truncate">{policy.number}</span>
+            <span className="text-white truncate">{policy.policyNumber}</span>
           </div>
         ))}
 
@@ -125,15 +131,15 @@ export function ClientSidebar({ client }: ClientSidebarProps) {
         {/* Case Info */}
         <div className="flex items-center">
           <Calendar className="h-5 w-5 text-gray-400 mr-4" />
-          <span className="text-gray-400 w-32">SOL</span>
-          <span className="text-white">{formatSOLDate(client.statusOfLimitation)}</span>
+          <span className="text-gray-400 w-32">SOL Date</span>
+          <span className="text-white">{calculateSOLDate(client.dateOfLoss)}</span>
         </div>
 
         <div className="flex items-center">
           <FileText className="h-5 w-5 text-gray-400 mr-4" />
           <span className="text-gray-400 w-32">Case Type</span>
           <span className="text-white">
-            {client.caseType || (client.incidentType === "car" ? "Auto Accident" : "Ladder Fall")}
+            {client.incidentType === "car" ? "Auto Accident" : "Ladder Fall"}
           </span>
         </div>
       </div>
