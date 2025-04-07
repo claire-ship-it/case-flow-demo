@@ -79,9 +79,12 @@ export default function CaseManagementDashboard() {
                     <td className="p-4 text-gray-300">
                       <div className="flex items-center gap-2">
                         <Link href={`/client/${client.id}`} className="flex items-center hover:text-blue-400">
-                          <IncidentIcon type={client.incidentType} />
+                          <IncidentIcon 
+                            type={client.incidentType} 
+                            className={client.stage === "Presuit" ? "text-green-500" : "text-yellow-500"} 
+                          />
                           <PersonEmoji gender={client.gender} fallback={client.name.charAt(0)} />
-                          {client.name}
+                          <span className="font-bold">{client.name}</span>
                         </Link>
                         <Link 
                           href={`/holy-grail/${client.id}`}
@@ -92,44 +95,36 @@ export default function CaseManagementDashboard() {
                         </Link>
                       </div>
                     </td>
-                    <td className="p-4 text-gray-300">{client.dateOfLoss}</td>
-                    <td className="p-4 text-center">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs ${client.tasksDue > 5 ? "bg-red-900 text-white" : client.tasksDue > 0 ? "bg-amber-900 text-white" : "bg-green-900 text-white"}`}
-                      >
-                        {client.tasksDue}
-                      </span>
+                    <td className="p-4 text-gray-300">
+                      {client.dateOfLoss}
+                    </td>
+                    <td className="p-4 text-center text-gray-300">
+                      {client.tasksDue}
                     </td>
                     <td className="p-4 text-gray-300">
-                      <div className="flex items-center">
+                      <div className="flex items-center gap-2">
                         <PersonEmoji gender={client.team.caseManagerGender} fallback={client.caseManager.charAt(0)} />
                         {client.caseManager}
                       </div>
                     </td>
                     <td className="p-4 text-gray-300">
-                      <div className="flex items-center">
+                      <div className="flex items-center gap-2">
                         <PersonEmoji gender={client.team.leadAttorneyGender} fallback={client.leadAttorney.charAt(0)} />
                         {client.leadAttorney}
                       </div>
                     </td>
                     <td className="p-4 text-center text-gray-300">
-                      <div className="flex items-center justify-center">
-                        <PersonEmoji
-                          gender={client.team.paralegalGender}
-                          fallback={client.paralegal.charAt(0)}
-                          className="h-5 w-5 mr-2 border border-gray-300"
-                        />
+                      <div className="flex items-center gap-2 justify-center">
+                        <PersonEmoji gender={client.team.paralegalGender} fallback={client.paralegal.charAt(0)} />
                         {client.paralegal}
                       </div>
                     </td>
-                    <td className="p-4">
-                      <div className="space-y-1">
-                        <div className="text-right text-xs text-green-500">{client.progress}%</div>
-                        <Progress
-                          value={client.progress}
-                          className="h-2.5 bg-gray-600"
-                        />
-                      </div>
+                    <td className="p-4 text-gray-300">
+                      <Progress 
+                        value={client.progress} 
+                        max={100} 
+                        className="[&>div]:bg-green-500" 
+                      />
                     </td>
                   </tr>
                 ))}
@@ -141,4 +136,3 @@ export default function CaseManagementDashboard() {
     </div>
   )
 }
-

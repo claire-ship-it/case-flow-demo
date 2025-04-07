@@ -927,7 +927,7 @@ export const clients: Client[] = [
       }
     ],
     statusOfLimitation: "03/15/2026",
-    shortmedicalnarrative: "Client sustained multiple injuries including cervical strain, post-traumatic headaches, and thoracic muscle strain. Currently undergoing physical therapy and diagnostic imaging.",
+    shortmedicalnarrative: "Patient has received comprehensive medical care from multiple providers. Star Orthopedic (10/12/2022): Dr. Park noted limited range of motion in cervical and lumbar spine, muscle spasms, tenderness, and positive straight leg raise test. TBI (01/18/2022): Dr. Vilims documented post-concussive symptoms including headaches, dizziness, memory difficulties, and neck pain. Associates MD (11/30/2022): Documented cervical, thoracic, and lumbar spine tenderness, muscle spasms, and decreased range of motion. Treatment plans include physical therapy, medication management, vestibular rehabilitation, cognitive rehabilitation, and further diagnostic imaging.",
     recentTreatments: [
       {
         date: "03/27/2024",
@@ -985,6 +985,312 @@ export const clients: Client[] = [
         }
       ],
       liabilityStatement: "The subject crash occurred on March 15, 2024, at approximately 10:30 AM, at the intersection of Fletcher Avenue and Bruce B Downs Boulevard. Vehicle 1, operated by Emily Parker (the defendant), was traveling northbound on Bruce B Downs Boulevard, while Vehicle 2, driven by John Smith, was traveling eastbound on Fletcher Avenue in the through lane. The defendant failed to stop at a red light, proceeding through the intersection and causing a T-bone collision with Mr. Smith's vehicle. The defendant was cited for failing to stop at a red light and careless driving. Mr. Smith was properly restrained, operating his vehicle lawfully with a green light, and no citations were issued against him. Liability rests solely with the defendant due to their failure to stop at the red light, and no liability rests with John Smith.",
+      countyOfIncident: "Hillsborough"
+    }
+  },
+  {
+    id: 2,
+    name: "Sarah Johnson",
+    email: "sarah.johnson@email.com",
+    phone: "(813) 555-5678",
+    address: "456 Oak Ave, Tampa, FL 33602",
+    dateOfLoss: "03/20/2024",
+    caseNumber: "2024-002",
+    status: "active",
+    dateOfBirth: "05/22/1990",
+    caseManager: "David Wilson",
+    ssn: "XXX-XX-5678",
+    maritalStatus: "single",
+    leadAttorney: "Michael Anderson",
+    paralegal: "Emily Davis",
+    progress: 45,
+    tasksDue: 2,
+    incidentType: "ladder",
+    gender: "female",
+    stage: "Medical Treatment",
+    team: {
+      caseManagerGender: "male",
+      leadAttorneyGender: "male",
+      paralegalGender: "female"
+    },
+    education: "Master's Degree",
+    hasFelon: false,
+    emergencyContact: {
+      name: "Robert Johnson",
+      relationship: "Father",
+      phone: "(813) 555-9012",
+      address: "456 Oak Ave, Tampa, FL 33602"
+    },
+    primaryPhone: "(813) 555-5678",
+    primaryEmail: "sarah.johnson@email.com",
+    clientSource: "Online",
+    vehicleDetails: "N/A",
+    accidentDescription: "Fell from ladder while cleaning gutters",
+    medicalTreatment: "Ongoing physical therapy and chiropractic care",
+    defendants: [
+      {
+        id: 1,
+        name: "Home Depot",
+        role: "Primary Defendant",
+        address: "789 Retail Way, Tampa, FL 33603",
+        phone: "(813) 555-3456",
+        email: "legal@homedepot.com",
+        dateOfBirth: "N/A",
+        licenseNumber: "N/A",
+        insuranceProvider: "Liberty Mutual",
+        policyNumber: "LM-987654321",
+        defenseCounsel: {
+          name: "Jennifer Wilson",
+          firmName: "Wilson Legal Group",
+          address: "321 Court Street, Tampa, FL 33602",
+          phone: "(813) 555-7890",
+          email: "jennifer.wilson@wilsonlegal.com"
+        }
+      }
+    ],
+    insurancePolicies: [
+      {
+        id: 1,
+        type: "UM",
+        policyType: "UM",
+        provider: {
+          name: "Progressive",
+          logo: "/logo/progressive.png"
+        },
+        policyNumber: "PROG-123456789",
+        claimNumber: "CLM-789012",
+        limit: "$100,000",
+        expectedSettlement: "$75,000",
+        expectedFirmFee: "$25,000",
+        adjuster: {
+          name: "Lisa Thompson",
+          role: "Senior Claims Adjuster",
+          phone: "(813) 555-2345",
+          email: "lisa.thompson@progressive.com"
+        },
+        contact: {
+          address: "123 Insurance Way, Tampa, FL 33602",
+          phone: "(800) 555-1234",
+          email: "claims@progressive.com",
+          fax: "(800) 555-5678"
+        },
+        vehicle: {
+          year: "N/A",
+          make: "N/A",
+          model: "N/A",
+          color: "N/A",
+          vin: "N/A",
+          licensePlate: "N/A",
+          driver: {
+            name: "Sarah Johnson",
+            licenseNumber: "FL-98765432"
+          }
+        },
+        defendant: {
+          name: "Sarah Johnson",
+          role: "Client"
+        }
+      }
+    ],
+    vehicles: [],
+    medicalProviders: [
+      {
+        id: 1,
+        name: "Tampa General Hospital",
+        type: "Hospital",
+        address: "1 Tampa General Circle, Tampa, FL 33606",
+        phone: "(813) 844-7000",
+        fax: "(813) 844-7001",
+        billingInfo: {
+          accountNumber: "TGH-67890",
+          totalBilled: 5000.00,
+          totalPaid: 0.00,
+          outstandingBalance: 5000.00
+        },
+        visits: [
+          {
+            id: 1,
+            date: "03/20/2024",
+            type: "Emergency Room",
+            notes: "Initial injury assessment",
+            billedAmount: 5000.00,
+            paidAmount: 0.00,
+            status: "pending",
+            facility: {
+              name: "Tampa General Hospital",
+              department: "Emergency",
+              level: "Emergency",
+              address: "1 Tampa General Circle, Tampa, FL 33606",
+              phone: "(813) 844-7000",
+              fax: "(813) 844-7001",
+              email: "records@tgh.org"
+            },
+            physician: {
+              name: "Dr. James Wilson, MD",
+              specialty: "Emergency Medicine",
+              credentials: ["Board Certified"]
+            },
+            treatmentAreas: [
+              { name: "Emergency", color: "orange" },
+              { name: "Orthopedics", color: "blue" }
+            ],
+            summary: "Emergency room visit for ladder fall injuries",
+            description: "Patient presented with back and shoulder injuries following a fall from a ladder",
+            cptCodes: [
+              { code: "99284", description: "Emergency department visit", amount: 500.00 }
+            ],
+            documents: []
+          }
+        ],
+        medicalRecords: []
+      },
+      {
+        id: 2,
+        name: "Tampa Bay Chiropractic",
+        type: "Chiropractic",
+        address: "123 Wellness Way, Tampa, FL 33602",
+        phone: "(813) 555-0123",
+        fax: "(813) 555-0124",
+        billingInfo: {
+          accountNumber: "TBC-12345",
+          totalBilled: 2000.00,
+          totalPaid: 0.00,
+          outstandingBalance: 2000.00
+        },
+        visits: [
+          {
+            id: 1,
+            date: "03/22/2024",
+            type: "Initial Consultation",
+            notes: "Initial chiropractic evaluation",
+            billedAmount: 2000.00,
+            paidAmount: 0.00,
+            status: "pending",
+            facility: {
+              name: "Tampa Bay Chiropractic",
+              department: "Chiropractic",
+              level: "Outpatient",
+              address: "123 Wellness Way, Tampa, FL 33602",
+              phone: "(813) 555-0123",
+              fax: "(813) 555-0124",
+              email: "records@tampabaychiro.com"
+            },
+            physician: {
+              name: "Dr. Michael Chen, DC",
+              specialty: "Chiropractic",
+              credentials: ["Board Certified"]
+            },
+            treatmentAreas: [
+              { name: "Chiropractic", color: "green" },
+              { name: "Rehabilitation", color: "blue" }
+            ],
+            summary: "Initial chiropractic consultation",
+            description: "Patient began chiropractic treatment for back and shoulder injuries",
+            cptCodes: [
+              { code: "98940", description: "Chiropractic manipulative treatment", amount: 150.00 }
+            ],
+            documents: []
+          }
+        ],
+        medicalRecords: []
+      }
+    ],
+    medicalRequests: [
+      {
+        id: 1,
+        type: "Medical Records Request",
+        provider: "Tampa General Hospital",
+        requestedBy: "Emily Davis",
+        requestedDate: "03/21/2024",
+        status: "pending",
+        notes: "Initial records request sent"
+      }
+    ],
+    tasks: [
+      {
+        id: 1,
+        title: "Follow up on medical records request",
+        dueDate: "03/28/2024",
+        responsible: {
+          name: "Emily Davis",
+          role: "Paralegal",
+          avatar: "/avatars/emily.jpg"
+        },
+        status: "pending"
+      }
+    ],
+    caseLogs: [
+      {
+        id: 1,
+        title: "Initial Client Meeting",
+        notes: "Met with client to discuss case details and treatment plan",
+        document: "initial-meeting-notes.pdf",
+        date: "03/21/2024",
+        type: "meeting"
+      }
+    ],
+    documents: [
+      {
+        id: 1,
+        title: "Client Intake Form",
+        description: "Completed intake documentation",
+        icon: "📄"
+      },
+      {
+        id: 2,
+        title: "Progressive - Declaration Pages",
+        description: "Insurance policy declaration pages",
+        icon: "📋"
+      },
+      {
+        id: 3,
+        title: "Medical Records Release",
+        description: "Signed authorization for release of medical records",
+        icon: "📝"
+      },
+      {
+        id: 4,
+        title: "Incident Report",
+        description: "Official incident report from Home Depot",
+        icon: "📋"
+      }
+    ],
+    statusOfLimitation: "03/20/2026",
+    shortmedicalnarrative: "Client sustained back and shoulder injuries from a fall while cleaning gutters. Currently undergoing chiropractic treatment and physical therapy.",
+    recentTreatments: [
+      {
+        date: "03/22/2024",
+        provider: "Tampa Bay Chiropractic",
+        type: "Chiropractic",
+        description: "Initial chiropractic evaluation and treatment"
+      },
+      {
+        date: "03/20/2024",
+        provider: "Tampa General Hospital",
+        type: "Emergency Room",
+        description: "Emergency room visit for initial injury assessment"
+      }
+    ],
+    crashReport: {
+      narrative: {
+        accidentDescription: "Client was cleaning gutters at her residence when the ladder she was using collapsed, causing her to fall approximately 10 feet to the ground. The ladder was recently purchased from Home Depot and was being used according to manufacturer instructions."
+      },
+      documentLink: "/documents/incident-report-2024-002.pdf",
+      reportingOfficer: {
+        name: "Officer Sarah Martinez",
+        badge: "T-5678",
+        department: "Tampa Police Department"
+      },
+      violations: [],
+      people: [
+        {
+          name: "Sarah Johnson",
+          role: "Victim",
+          injuries: ["Back strain", "Shoulder injury", "Minor contusions"],
+          statements: ["I was using the ladder according to the instructions when it suddenly collapsed."]
+        }
+      ],
+      liabilityStatement: "The incident occurred on March 20, 2024, at approximately 2:30 PM, at the client's residence. The client was using a ladder purchased from Home Depot to clean gutters when the ladder collapsed, causing her to fall approximately 10 feet. The ladder was being used according to manufacturer instructions and was less than 6 months old. The incident was reported to Home Depot, and an investigation is ongoing regarding potential product defects. Liability may rest with Home Depot due to potential product defects, and no liability rests with Sarah Johnson as she was using the product as intended.",
       countyOfIncident: "Hillsborough"
     }
   }
