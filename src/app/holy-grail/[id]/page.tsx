@@ -25,6 +25,7 @@ export default function HolyGrailPage({ params }: PageProps) {
 
   // Format client data for header
   const clientData = {
+    id: client.id,
     name: client.name,
     dateOfLoss: client.dateOfLoss,
     defenseAttorney: client.defendants[0]?.defenseCounsel?.name || 'Not Assigned',

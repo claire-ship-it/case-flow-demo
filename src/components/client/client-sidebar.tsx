@@ -98,13 +98,23 @@ export function ClientSidebar({ client }: ClientSidebarProps) {
         </div>
 
         {/* Insurance Policies */}
-        {client.insurancePolicies && client.insurancePolicies.map((policy, index) => (
-          <div key={index} className="flex items-center">
-            <CreditCard className="h-5 w-5 text-gray-400 mr-4" />
-            <span className="text-gray-400 w-32">{policy.type.charAt(0).toUpperCase() + policy.type.slice(1)} Policy</span>
-            <span className="text-white truncate">{policy.policyNumber}</span>
-          </div>
-        ))}
+        {client.insurancePolicies && 
+          // Group policies by type and only show the first of each type
+          Object.entries(
+            client.insurancePolicies.reduce((acc, policy) => {
+              if (!acc[policy.type]) {
+                acc[policy.type] = policy;
+              }
+              return acc;
+            }, {} as Record<string, typeof client.insurancePolicies[0]>)
+          ).map(([type, policy], index) => (
+            <div key={index} className="flex items-center">
+              <CreditCard className="h-5 w-5 text-gray-400 mr-4" />
+              <span className="text-gray-400 w-32">{type.charAt(0).toUpperCase() + type.slice(1)} Policy</span>
+              <span className="text-white truncate">{policy.policyNumber}</span>
+            </div>
+          ))
+        }
 
         {/* Date of Birth */}
         <div className="flex items-center">

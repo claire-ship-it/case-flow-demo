@@ -65,7 +65,7 @@ export function Header({ client }: HeaderProps) {
               </div>
 
               <div className="flex flex-col items-center">
-                <span className="text-sm text-gray-400">Defence Attorney</span>
+                <span className="text-sm text-gray-400">Defense Attorney</span>
                 <span className="text-sm font-medium text-white">{client.defenseAttorney}</span>
               </div>
 
@@ -97,6 +97,7 @@ export function Header({ client }: HeaderProps) {
         isOpen={isChatOpen}
         onClose={() => setIsChatOpen(false)}
         clientName={client.name}
+        clientId={client.id}
       />
     </>
   )

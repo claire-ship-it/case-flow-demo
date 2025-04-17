@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { Avatar } from "@/components/ui/avatar"
 import { Client, MedicalProvider } from "@/data/clients"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 
 interface TreatmentVisit {
   id: number
@@ -97,6 +98,9 @@ export function ClientSupport2({ client, activeTab }: ClientSupport2Props) {
     medicalRecords: true,
     treatmentTimeline: true
   })
+  const [documents, setDocuments] = useState(client.documents || [])
+  const [isViewerOpen, setIsViewerOpen] = useState(false)
+  const [viewingDocumentId, setViewingDocumentId] = useState<number | null>(null)
 
   // Auto-select first provider and visit when switching to medical-providers tab
   useEffect(() => {
@@ -136,6 +140,40 @@ export function ClientSupport2({ client, activeTab }: ClientSupport2Props) {
     }
   }, [activeTab, client.documents]);
 
+  // Add this useEffect to check for new documents
+  useEffect(() => {
+    // Check localStorage for new documents
+    const storedDocs = JSON.parse(localStorage.getItem('clientDocuments') || '[]')
+    if (storedDocs.length > 0) {
+      // Merge with existing documents, avoiding duplicates
+      const updatedDocs = [...documents]
+      storedDocs.forEach(newDoc => {
+        if (!updatedDocs.some(doc => doc.id === newDoc.id)) {
+          updatedDocs.unshift(newDoc)
+        }
+      })
+      setDocuments(updatedDocs)
+    }
+    
+    // Set up interval to check for new documents
+    const interval = setInterval(() => {
+      const refreshedDocs = JSON.parse(localStorage.getItem('clientDocuments') || '[]')
+      if (refreshedDocs.length > 0) {
+        setDocuments(prevDocs => {
+          const updatedDocs = [...prevDocs]
+          refreshedDocs.forEach(newDoc => {
+            if (!updatedDocs.some(doc => doc.id === newDoc.id)) {
+              updatedDocs.unshift(newDoc)
+            }
+          })
+          return updatedDocs
+        })
+      }
+    }, 5000)
+    
+    return () => clearInterval(interval)
+  }, [])
+
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({
       ...prev,
@@ -170,6 +208,18 @@ export function ClientSupport2({ client, activeTab }: ClientSupport2Props) {
     if (provider.visits.length > 0) {
       setSelectedVisit(provider.visits[0].id);
     }
+  }
+
+  // Add this function to handle viewing a document
+  const handleViewDocument = (docId: number) => {
+    setViewingDocumentId(docId)
+    setIsViewerOpen(true)
+  }
+
+  // Add this to close the viewer
+  const closeViewer = () => {
+    setIsViewerOpen(false)
+    setViewingDocumentId(null)
   }
 
   // Safety check for client
@@ -758,7 +808,7 @@ export function ClientSupport2({ client, activeTab }: ClientSupport2Props) {
 
             {/* Document list */}
             <div className="space-y-2">
-              {client.documents.map((doc) => (
+              {documents.map((doc) => (
                 <div key={doc.id} className="bg-[#1E293B] rounded-lg p-4 hover:bg-[#2D3B4E] transition-colors">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
@@ -770,7 +820,10 @@ export function ClientSupport2({ client, activeTab }: ClientSupport2Props) {
                         <p className="text-[#ADB5BD] text-sm">{doc.description}</p>
                       </div>
                     </div>
-                    <button className="flex items-center gap-2 px-4 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-[#1D4ED8] transition-colors">
+                    <button 
+                      className="flex items-center gap-2 px-4 py-2 bg-[#2563EB] text-white rounded-lg hover:bg-[#1D4ED8] transition-colors"
+                      onClick={() => handleViewDocument(doc.id)}
+                    >
                       <span>View</span>
                       <FileText className="w-4 h-4" />
                     </button>
@@ -787,6 +840,30 @@ export function ClientSupport2({ client, activeTab }: ClientSupport2Props) {
           </div>
         )}
       </div>
+
+      {/* Document Viewer Dialog */}
+      {isViewerOpen && (
+        <Dialog open={isViewerOpen} onOpenChange={closeViewer}>
+          <DialogContent className="max-w-4xl h-[80vh] bg-[#1E293B] border-[#374151] text-white">
+            <DialogHeader>
+              <DialogTitle>
+                {documents.find(d => d.id === viewingDocumentId)?.title || "Document"}
+              </DialogTitle>
+              <DialogDescription className="text-gray-400">
+                {documents.find(d => d.id === viewingDocumentId)?.description || ""}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex-1 h-full mt-4">
+              <iframe 
+                src="https://docs.google.com/document/d/11MeaNMYq2_f_81bM1uW9k6WV1FBYS5RB4o3vk7ncPAg/edit?tab=t.0"
+                className="w-full h-[calc(100%-2rem)]"
+                frameBorder="0"
+                allowFullScreen
+              />
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   )
 }

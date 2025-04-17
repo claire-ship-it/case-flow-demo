@@ -23,6 +23,7 @@ export function Chat({ isOpen, onClose, clientName }: ChatProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [isTyping, setIsTyping] = useState(false)
+  const [conversationStep, setConversationStep] = useState(0)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   
   const scrollToBottom = () => {
@@ -32,6 +33,20 @@ export function Chat({ isOpen, onClose, clientName }: ChatProps) {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  // Hardcoded responses for John Smith
+  const getAIResponse = (questionIndex: number) => {
+    switch(questionIndex) {
+      case 0: // Injuries
+        return `${clientName} sustained several injuries in the accident including cervical strain, post-traumatic headaches, and thoracic muscle strain. These injuries were documented in the initial medical assessment and are consistent with the type of collision that occurred.`;
+      case 1: // Accident details
+        return `The accident occurred on March 15, 2024, at approximately 10:30 AM at the intersection of Fletcher Avenue and Bruce B Downs Boulevard. ${clientName} was traveling eastbound on Fletcher Avenue with a green light when the defendant (Emily Parker) ran a red light and caused a T-bone collision. The defendant was cited for failing to stop at a red light and careless driving.`;
+      case 2: // Medical providers
+        return `${clientName} is currently being treated by three medical providers: Advent Health Surgery Center for orthopedic evaluation, Active Wellness & Rehabilitation Center for physical therapy (4 sessions completed so far), and Tampa Bay Imaging for diagnostic imaging including X-rays and MRI. The most recent treatment was a physical therapy session on March 27, 2024.`;
+      default:
+        return `I don't have specific information about that question. Would you like me to check with the case manager?`;
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -47,17 +62,20 @@ export function Chat({ isOpen, onClose, clientName }: ChatProps) {
     setMessages(prev => [...prev, userMessage])
     setInput("")
     setIsTyping(true)
-
-    // Simulate AI response (replace with actual LLM integration)
+    
+    // Simulate AI response delay
     setTimeout(() => {
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
-        content: "This is a simulated AI response. Replace this with actual LLM integration.",
+        content: getAIResponse(conversationStep),
         role: "assistant",
         timestamp: new Date()
       }
       setMessages(prev => [...prev, aiMessage])
       setIsTyping(false)
+      
+      // Move to next conversation step
+      setConversationStep(prev => Math.min(prev + 1, 2))
     }, 1000)
   }
 

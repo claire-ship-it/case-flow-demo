@@ -5,8 +5,20 @@ interface LiabilityProps {
 }
 
 export function Liability({ liabilityStatement }: LiabilityProps) {
-  // Format the liability statement with proper line breaks, avoiding breaks after "Mr."
-  const formattedStatement = liabilityStatement?.split(/(?<=\. )(?!Mr\.)/).filter(Boolean) || []
+  // Split the statement into paragraphs at specific points
+  const formatLiabilityStatement = (statement: string) => {
+    // Replace specific sentence endings with the same ending plus two line breaks
+    return statement
+      .replace(/Boulevard\./g, 'Boulevard.\n\n')
+      .replace(/through lane\./g, 'through lane.\n\n')
+      .replace(/Mr\. Smith's vehicle\./g, 'Mr. Smith\'s vehicle.\n\n')
+      .replace(/careless driving\./g, 'careless driving.\n\n')
+      // Preserve the rest as is
+      .split('\n\n')
+      .map((paragraph, index) => (
+        <p key={index} className="mb-4">{paragraph}</p>
+      ));
+  };
 
   return (
     <div className="h-full">
@@ -32,12 +44,8 @@ export function Liability({ liabilityStatement }: LiabilityProps) {
           <h2 className="text-xl font-semibold text-white">Liability Statement</h2>
         </div>
         
-        <div className="space-y-6 text-gray-300">
-          {formattedStatement.map((paragraph, index) => (
-            <p key={index} className="text-base leading-relaxed">
-              {paragraph.trim()}
-            </p>
-          ))}
+        <div className="text-sm text-gray-300">
+          {formatLiabilityStatement(liabilityStatement || '')}
         </div>
       </div>
     </div>
