@@ -1,6 +1,6 @@
 "use client"
 
-import React from "react"; // Import React
+import React, { useState, useEffect } from "react"; // Import useEffect
 import {
   Select,
   SelectContent,
@@ -12,8 +12,20 @@ import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button" // Import Button if needed
-import { type Client } from "@/data/clients" // Import Client type
-import { ChevronDown, ChevronRight, PlusCircle } from "lucide-react" // Import icons
+import { type Client, type Document as ClientDocument } from "@/data/clients" // Import Client type and ClientDocument type
+import { ChevronDown, ChevronRight, PlusCircle, FileText, DollarSign } from "lucide-react" // Import icons
+// Import Dialog components
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogTrigger,
+  DialogClose, // Import DialogClose for the cancel button
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label" // Import Label for form
 
 // Define props for LitDetails
 interface LitDetailsProps {
@@ -25,13 +37,143 @@ interface LitDetailsProps {
     cmeDetails?: boolean;
     depositions?: boolean;
     pfs?: boolean; // Add pfs key
+    offers?: boolean; // Add offers key
     [key: string]: boolean | undefined; // Allow other string keys
   };
   toggleSection: (section: keyof LitDetailsProps['expandedSections']) => void;
   SectionHeader: React.FC<{ title: string; section: keyof LitDetailsProps['expandedSections'] }>;
 }
 
+// Define Offer interface
+interface Offer {
+    id: number | string; // Allow string for generated IDs
+    amount: string;
+    date: string;
+    status: string;
+    type: string;
+}
+
 export function LitDetails({ client, expandedSections, toggleSection, SectionHeader }: LitDetailsProps) {
+  // State to control the Add Offer dialog
+  const [isAddOfferDialogOpen, setIsAddOfferDialogOpen] = useState(false);
+  // Add state for the success message
+  const [showCrnMessage, setShowCrnMessage] = useState(false);
+
+  // Initial hardcoded data (can be moved outside if preferred)
+  const initialOffers: Offer[] = [
+    { id: 1, amount: "$100,000.00", date: "01/15/2025", status: "Rejected", type: "Defendant Offer" },
+    { id: 2, amount: "$150,000.00", date: "02/10/2025", status: "Pending", type: "Firm Counter" },
+  ];
+
+  const initialPFS = [
+    { id: 1, amount: "$125,000.00", fileDate: "02/20/2025", status: "Served", type: "Against Defendant" },
+    { id: 2, amount: "$200,000.00", fileDate: "03/01/2025", status: "Drafting", type: "For Claimant" },
+  ];
+
+  // Use state for offers list
+  const [offers, setOffers] = useState<Offer[]>(initialOffers);
+  // Use state for PFS list (if you want to add to it later)
+  const [pfsList, setPfsList] = useState(initialPFS);
+
+  // Updated submit handler to add offer locally and update localStorage['clientDocuments']
+  const handleAddOfferSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    console.log("[LitDetails] handleAddOfferSubmit: Function started.");
+
+    // --- Add offer to local state (for immediate UI update in this component) ---
+    const formData = new FormData(event.currentTarget);
+    const amount = formData.get('offer-amount') as string || '$0.00';
+    const dateRaw = formData.get('offer-date') as string;
+    const date = dateRaw ? new Date(dateRaw + 'T00:00:00').toLocaleDateString() : new Date().toLocaleDateString();
+    const type = formData.get('offer-type') as string || 'N/A';
+    const status = formData.get('offer-status') as string || 'Pending';
+
+    const newOffer: Offer = {
+        id: `offer-${Date.now()}`,
+        amount: amount,
+        date: date,
+        type: type.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()),
+        status: status.charAt(0).toUpperCase() + status.slice(1)
+    };
+    console.log("[LitDetails] handleAddOfferSubmit: Adding offer to local state:", newOffer);
+    setOffers(prevOffers => [newOffer, ...prevOffers]);
+
+    // --- Close dialog and show temporary message ---
+    console.log("[LitDetails] handleAddOfferSubmit: Closing dialog.");
+    setIsAddOfferDialogOpen(false);
+    setShowCrnMessage(true);
+    setTimeout(() => {
+      setShowCrnMessage(false);
+    }, 5000);
+
+    // --- Update localStorage['clientDocuments'] after delay ---
+    console.log("[LitDetails] handleAddOfferSubmit: Starting 30s delay for CRN document localStorage update.");
+    setTimeout(() => {
+      console.log("[LitDetails] handleAddOfferSubmit: (After 30s delay) Updating 'clientDocuments' in localStorage.");
+
+      // Helper function to get CRN HTML using the provided template
+      const getCrnHtml = (clientData: Client): string => {
+        const safeName = clientData.name || 'John Smith'; // Use client name or default
+        const safeAddress = clientData.address || '123 Main St, Tampa, FL 33601'; // Use client address or default
+        const safeEmail = clientData.email || 'john.smith@email.com'; // Use client email or default
+
+        // *** Use the exact HTML provided by the user ***
+        return `<!DOCTYPE html><html lang="en"><head>   <meta charset="UTF-8">   <meta name="viewport" content="width=device-width, initial-scale=1.0">   <title>Civil Remedy Notice</title></head><body style="margin: 0; padding: 0;">   <div style="font-family: 'Times New Roman', Times, serif; font-size: 12pt; margin-left: 0.5in; text-align: left;">       Complainant: ${safeName}<br>       <br>       ${safeAddress} <br>       Tampa,  FL 33601<br>       <br>       Email: ${safeEmail}<br>       <br>       BI Insured: Jason Miller<br>       <br>       BI Claim Number: CLM-345678<br>       <br>       BI Policy Number: PRG-456789123<br>       <br>       Progressive<br>       789 Insurance Ave<br>       Orchard City, CA 90210<br>       <br>       BI Claims Specialist: Michael Brown<br>       <br>       (555) 345-6789<br>       michael.brown@progressive.com<br>       <br>       <a href="mailto:Ryan@RyanHughesLaw.com" style="color: blue; text-decoration: underline;">Ryan@RyanHughesLaw.com</a>   </div><br><div style="font-family: 'Times New Roman', Times, serif; font-size: 12pt; margin-left: 0.5in; text-align: left;">   Reasons for Notice:<br>   <br>   <b>Claim Denial<br>   Claim Delay<br>   Unsatisfactory Settlement Offer<br>   Unfair Trade Practice<br>   Other: Failure to Tender</b><br>   <br>   <table style="width: 100%; border-collapse: collapse;">       <tr>           <td style="width: 50px; border: 1px solid #999; padding: 3pt; vertical-align: top;"><b>Re<br>mo<br>ve</b></td>           <td style="border: 1px solid #999; padding: 3pt;"><b>Other:</b> Progressive <b>has substantially delayed the claim refusing to make a reasonable offer in response to the Complainant's demand and showing of sufficient evidence</b></td>       </tr>       <tr>           <td style="width: 50px; border: 1px solid #999; padding: 3pt; vertical-align: top;"><b>Re<br>mo<br>ve</b></td>           <td style="border: 1px solid #999; padding: 3pt;"><b>Other:</b> Progressive <b>has not conducted a full and prompt investigation of the facts and circumstances of this loss</b></td>       </tr>       <tr>           <td style="width: 50px; border: 1px solid #999; padding: 3pt; vertical-align: top;"><b>Re<br>mo<br>ve</b></td>           <td style="border: 1px solid #999; padding: 3pt;"><b>Other:</b> Progressive <b>has not trained, supervised, or managed its adjusters properly so that prompt and full payment of policy limits could be tendered upon showing of sufficient evidence</b></td>       </tr>       <tr>           <td style="width: 50px; border: 1px solid #999; padding: 3pt; vertical-align: top;"><b>Re<br>mo<br>ve</b></td>           <td style="border: 1px solid #999; padding: 3pt;"><b>Other:</b> Progressive <b>is forcing the insured to litigate in order to obtain coverage under the insurance policy</b></td>       </tr>       <tr>           <td style="width: 50px; border: 1px solid #999; padding: 3pt; vertical-align: top;"><b>Re<br>mo<br>ve</b></td>           <td style="border: 1px solid #999; padding: 3pt;"><b>Other:</b> Progressive <b>has failed to pay the full value of the claim</b></td>       </tr>       <tr>           <td style="width: 50px; border: 1px solid #999; padding: 3pt; vertical-align: top;"><b>Re<br>mo<br>ve</b></td>           <td style="border: 1px solid #999; padding: 3pt;"><b>Other:</b> Progressive <b>has exploited the financial vulnerability of the insured to obtain a favorable settlement</b></td>       </tr>   </table></div><div style="font-family: 'Times New Roman', Times, serif; font-size: 12pt; margin-left: 0.5in; text-align: left;">    <p style="margin: 24pt 0 12pt 0;"><b>PURSUANT TO SECTION 624.155, F.S.</b> please indicate all statutory provisions alleged to have been violated.</p>    <p style="margin: 0 0 12pt 0;"><b>624.155(1)(b)(1)</b><br>    <b>Not attempting in good faith to settle claims when, under all the circumstances, it could and should have done so, had it acted fairly and honestly toward its insured and with due regard for her or his interests.</b></p>    <p style="margin: 0 0 12pt 0;"><b>626.9541(1)(i)(3)(a)</b><br>    <b>Failing to adopt and implement standards for the proper investigation of claims.</b></p>    <p style="margin: 0 0 12pt 0;"><b>626.9541(1)(i)(3)(d)</b><br>    <b>Denying claims without conducting reasonable investigations based upon available information.</b></p>    <p style="margin: 24pt 0 12pt 0;"><b>Policy Provisions:</b><br>    <b>"We will pay damages for "bodily injury" or "property damage" for which any "insured" becomes legally responsible because of an auto accident. Damages include prejudgment interest awarded against the "insured". We will settle or defend, as we consider appropriate, any claim or suit asking for these damages. In addition to our limit of liability, we will pay all defense costs we incur. Our duty to settle or defend ends when our limit of liability for this coverage has been exhausted by payment of judgments or settlements. We have no duty to defend any suit or settle any claim for "bodily injury" or "property damage" not covered under this policy."</b></p></div><div style="font-family: 'Times New Roman', Times, serif; font-size: 12pt; margin-left: 0.5in; text-align: left;">   <p style="margin: 0 0 12pt 0;"><b><u>CRN TEXT:</u></b></p>   <p style="margin: 0 0 12pt 0;">The subject crash occurred on Friday, March 15, 2024, at approximately 10:30 AM, at the intersection of Fletcher Avenue and Bruce B Downs Boulevard. Vehicle 1, operated by Jason Miller (the insured), was traveling northbound on Bruce B Downs Boulevard, while Vehicle 2, driven by ${safeName}, was traveling eastbound on Fletcher Avenue in the through lane. The insured failed to stop at a red light, proceeding through the intersection and causing a T-bone collision with Mr. Smith's vehicle. The insured was cited for failing to stop at a red light and careless driving. Mr. Smith was properly restrained, operating his vehicle lawfully with a green light, and no citations were issued against him. Liability rests solely with the insured due to their failure to stop at the red light, and no liability rests with ${safeName}.</p>   <p style="margin: 0 0 12pt 0;">Mr. Smith received care at multiple facilities including Advent Health Surgery Center, Active Wellness & Rehabilitation Center, and Tampa Bay Imaging. His treatment included physical therapy, orthopedic evaluation, diagnostic imaging such as X-rays and MRIs, and rehabilitation. Diagnoses included cervical strain, thoracic strain, lumbar strain, muscle spasms, and post-traumatic headaches. The medical bills total approximately $7,500.00, with treatment ongoing and pain symptoms persisting.</p>   <p style="margin: 0 0 12pt 0;">Despite numerous opportunities to settle this claim within the policy limits, Progressive has failed to make a good faith effort to resolve the matter. No reasonable offer has been extended. This lack of timely adjustment and refusal to tender the $75,000 BI policy limits has placed their insured, Jason Miller, at significant financial risk.</p>   <p style="margin: 0 0 12pt 0;">${safeName} hereby files this Civil Remedy Notice with the opportunity for Progressive to cure the violations within 60 days of receipt. Tender of the full $75,000 policy limits to "Ryan T. Hughes trust account, for the benefit of ${safeName}" will be considered a full and final settlement of all claims stemming from this incident. Failure to do so may result in a statutory bad faith action pursuant to Florida Statutes, including potential recovery of interest, attorneys' fees, and costs. This CRN serves as formal notice to Progressive of its statutory duties and the consequences of its ongoing inaction.</p></div></body></html>`;
+      }
+
+      // 1. Create the new CRN document object, ensuring htmlContent is assigned
+      const newCrnDocument: ClientDocument = {
+        id: `generated-CRN-${Date.now()}`,
+        title: `Civil Remedy Notice - ${client.name}`,
+        type: "CRN",
+        date: new Date().toLocaleDateString(),
+        size: "0.2 MB",
+        description: `Generated on ${new Date().toLocaleDateString()}`,
+        htmlContent: getCrnHtml(client) // Assign the correct HTML content
+      };
+      // Log the object to verify content before saving
+      console.log("[LitDetails] handleAddOfferSubmit: New CRN Document Object being created:", JSON.stringify(newCrnDocument)); // Log the stringified object
+
+      try {
+        // 2. Read existing documents from localStorage
+        const storedDocsString = localStorage.getItem('clientDocuments');
+        let existingDocs: ClientDocument[] = [];
+        if (storedDocsString) {
+          try {
+            existingDocs = JSON.parse(storedDocsString);
+            if (!Array.isArray(existingDocs)) {
+              console.warn("[LitDetails] handleAddOfferSubmit: Invalid data in localStorage['clientDocuments'], resetting.");
+              existingDocs = [];
+            }
+          } catch (parseError) {
+             console.error("[LitDetails] handleAddOfferSubmit: Error parsing localStorage['clientDocuments']:", parseError);
+             existingDocs = []; // Reset on parse error
+          }
+        }
+        console.log(`[LitDetails] handleAddOfferSubmit: Found ${existingDocs.length} existing docs in localStorage.`);
+
+        // 3. Prepend the new document
+        const updatedDocs = [newCrnDocument, ...existingDocs];
+        console.log(`[LitDetails] handleAddOfferSubmit: Updated docs array contains ${updatedDocs.length} docs.`);
+
+        // 4. Write the updated array back to localStorage
+        localStorage.setItem('clientDocuments', JSON.stringify(updatedDocs));
+        console.log("[LitDetails] handleAddOfferSubmit: Successfully updated 'clientDocuments' in localStorage.");
+
+      } catch (error) {
+        console.error("[LitDetails] handleAddOfferSubmit: Error updating localStorage['clientDocuments']:", error);
+      }
+
+    }, 30000); // 30 seconds delay
+  };
+
+  // Effect to clear message if section is collapsed/re-expanded (optional cleanup)
+  useEffect(() => {
+    if (!expandedSections.offers) {
+      setShowCrnMessage(false);
+    }
+  }, [expandedSections.offers]);
+
   return (
     <div className="w-full space-y-6">
       {/* Discovery & Pretrial Section */}
@@ -541,131 +683,178 @@ export function LitDetails({ client, expandedSections, toggleSection, SectionHea
           </div>
         )}
       </div>
-      {/* PFS Section */}
-      <div className="w-full bg-[#0E1826] rounded-[10px] p-6 relative"> {/* Added relative positioning */}
-        {/* Generate Button (Top Right) */}
-        <Button className="absolute top-4 right-4 bg-blue-600 hover:bg-blue-700 text-white">
-          Generate PFS Documents
-        </Button>
 
-        <SectionHeader title="PFS" section="pfs" />
+      {/* --- Offers Section (Collapsible) --- */}
+      <div className="w-full bg-[#0E1826] rounded-[10px] p-6">
+        <SectionHeader title="Offers" section="offers" />
+        {expandedSections.offers && (
+          <div className="mt-6 space-y-3">
+             {/* Add Offer Button wrapped in DialogTrigger */}
+             <Dialog open={isAddOfferDialogOpen} onOpenChange={setIsAddOfferDialogOpen}>
+               <DialogTrigger asChild>
+                 <div className="flex justify-end mb-4">
+                    <Button variant="outline" size="sm" className="bg-[#1A2433] border-[#374151] hover:bg-[#243042] text-gray-300">
+                      <PlusCircle className="w-4 h-4 mr-2" />
+                      Add Offer
+                    </Button>
+                 </div>
+               </DialogTrigger>
+               <DialogContent className="sm:max-w-[425px] bg-[#1E293B] border-[#374151] text-white">
+                 <DialogHeader>
+                   <DialogTitle>Add New Offer</DialogTitle>
+                   <DialogDescription className="text-gray-400">
+                     Enter the details for the new offer. Click save when you're done.
+                   </DialogDescription>
+                 </DialogHeader>
+                 {/* Add Offer Form */}
+                 <form onSubmit={handleAddOfferSubmit}>
+                   {/* Add Note about CRN Generation */}
+                   <p className="text-xs text-yellow-400 bg-yellow-900/30 border border-yellow-700/50 rounded p-2 my-3">
+                     Note: Submitting this offer will generate a Civil Remedy Notice (CRN) document, which can be found in the main Documents section after generation.
+                   </p>
+                   <div className="grid gap-4 py-4">
+                     <div className="grid grid-cols-4 items-center gap-4">
+                       <Label htmlFor="offer-amount" className="text-right text-gray-400">
+                         Amount
+                       </Label>
+                       <Input name="offer-amount" id="offer-amount" placeholder="$0.00" className="col-span-3 bg-[#1A2433] border-[#374151]" />
+                     </div>
+                     <div className="grid grid-cols-4 items-center gap-4">
+                       <Label htmlFor="offer-date" className="text-right text-gray-400">
+                         Date
+                       </Label>
+                       <Input name="offer-date" id="offer-date" type="date" className="col-span-3 bg-[#1A2433] border-[#374151]" />
+                     </div>
+                     <div className="grid grid-cols-4 items-center gap-4">
+                       <Label htmlFor="offer-type" className="text-right text-gray-400">
+                         Type
+                       </Label>
+                       <Select name="offer-type">
+                         <SelectTrigger id="offer-type" className="col-span-3 bg-[#1A2433] border-[#374151]">
+                           <SelectValue placeholder="Select type" />
+                         </SelectTrigger>
+                         <SelectContent className="bg-[#1E293B] text-white border-[#374151]">
+                           <SelectItem value="defendant-offer">Defendant Offer</SelectItem>
+                           <SelectItem value="firm-counter">Firm Counter</SelectItem>
+                           <SelectItem value="client-demand">Client Demand</SelectItem>
+                         </SelectContent>
+                       </Select>
+                     </div>
+                     <div className="grid grid-cols-4 items-center gap-4">
+                       <Label htmlFor="offer-status" className="text-right text-gray-400">
+                         Status
+                       </Label>
+                       <Select name="offer-status">
+                         <SelectTrigger id="offer-status" className="col-span-3 bg-[#1A2433] border-[#374151]">
+                           <SelectValue placeholder="Select status" />
+                         </SelectTrigger>
+                         <SelectContent className="bg-[#1E293B] text-white border-[#374151]">
+                           <SelectItem value="pending">Pending</SelectItem>
+                           <SelectItem value="accepted">Accepted</SelectItem>
+                           <SelectItem value="rejected">Rejected</SelectItem>
+                           <SelectItem value="withdrawn">Withdrawn</SelectItem>
+                         </SelectContent>
+                       </Select>
+                     </div>
+                   </div>
+                   <DialogFooter>
+                     {/* Use DialogClose for the Cancel button */}
+                     <DialogClose asChild>
+                        <Button type="button" variant="outline" className="text-gray-300 border-[#374151] hover:bg-[#243042]">Cancel</Button>
+                     </DialogClose>
+                     <Button type="submit" className="bg-blue-600 hover:bg-blue-700">Save Offer</Button>
+                   </DialogFooter>
+                 </form>
+               </DialogContent>
+             </Dialog>
+
+             {/* Display CRN Generation Message */}
+             {showCrnMessage && (
+               <p className="text-sm text-green-400 bg-green-900/30 border border-green-700/50 rounded p-3 my-2 text-center">
+                 Offer submitted. Generating CRN... It will appear in the Documents section shortly.
+               </p>
+             )}
+
+             {/* Offer List - Map over state variable 'offers' */}
+             {offers.length > 0 ? (
+               offers.map((offer) => ( // Use offers state here
+                 <div key={offer.id} className="bg-[#151F2D] p-3 rounded-lg flex justify-between items-center">
+                   <div className="flex items-center gap-3">
+                      <DollarSign className="w-5 h-5 text-green-400" />
+                      <div>
+                        <p className="text-white font-medium">{offer.amount}</p>
+                        <p className="text-xs text-gray-400">{offer.type} - {offer.date}</p>
+                      </div>
+                   </div>
+                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                     offer.status === 'Rejected' ? 'bg-red-900/50 text-red-400' :
+                     offer.status === 'Accepted' ? 'bg-green-900/50 text-green-400' :
+                     'bg-yellow-900/50 text-yellow-400' // Pending
+                   }`}>
+                     {offer.status}
+                   </span>
+                 </div>
+               ))
+             ) : (
+               <p className="text-gray-500 text-sm text-center py-4">No offers recorded.</p>
+             )}
+          </div>
+        )}
+      </div>
+      {/* --- END Offers Section --- */}
+
+      {/* PFS Section (Collapsible and Simplified) */}
+      <div className="w-full bg-[#0E1826] rounded-[10px] p-6">
+        <SectionHeader title="PFS (Proposal for Settlement)" section="pfs" />
         {expandedSections.pfs && (
-          <div className="mt-6 space-y-4 pt-4"> {/* Added pt-4 for spacing below button */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Left Column */}
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <label htmlFor="pfs-file-date" className="text-sm font-medium text-gray-400">File Date</label>
-                  <Input id="pfs-file-date" type="text" placeholder="mm/dd/yyyy" className="w-full bg-[#1A2433] border-[#374151]" defaultValue="2/20/2025" />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="pfs-order" className="text-sm font-medium text-gray-400">Order</label>
-                  <Input id="pfs-order" type="number" placeholder="1" className="w-full bg-[#1A2433] border-[#374151]" defaultValue={1} />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="pfs-type" className="text-sm font-medium text-gray-400">PFS Type</label>
-                  <Select defaultValue="against-defendant">
-                    <SelectTrigger id="pfs-type" className="w-full bg-[#1A2433] border-[#374151]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-[#1E293B] text-white border-[#374151]">
-                      <SelectItem value="against-defendant">Against Defendant</SelectItem>
-                      <SelectItem value="for-claimant">For Claimant</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="pfs-status" className="text-sm font-medium text-gray-400 flex flex-col">
-                     Status - Defendant
-                     <span className="text-xs text-gray-500">Status need to be "Generate Letter" for button to be visible.</span>
-                  </label>
-                  <Select defaultValue="request-approval">
-                    <SelectTrigger id="pfs-status" className="w-full bg-[#1A2433] border-[#374151]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent className="bg-[#1E293B] text-white border-[#374151]">
-                      <SelectItem value="request-approval">Request Approval from Craig</SelectItem>
-                      <SelectItem value="drafting">Drafting</SelectItem>
-                      <SelectItem value="pending-signature">Pending Signature</SelectItem>
-                      <SelectItem value="served">Served</SelectItem>
-                      <SelectItem value="rejected">Rejected</SelectItem>
-                      <SelectItem value="accepted">Accepted</SelectItem>
-                      <SelectItem value="expired">Expired</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+          <div className="mt-6 space-y-4">
 
-              {/* Right Column */}
-              <div className="space-y-4">
-                 <div className="space-y-2">
-                  <label htmlFor="pfs-amount" className="text-sm font-medium text-gray-400 flex flex-col">
-                    Amount
-                     <span className="text-xs text-gray-500">Field needs a value for button to be visible.</span>
-                  </label>
-                  <Input id="pfs-amount" type="text" placeholder="$0.00" className="w-full bg-[#1A2433] border-[#374151]" defaultValue="$125,000.00" />
-                </div>
-                 <div className="space-y-2">
-                  <label htmlFor="pfs-beat" className="text-sm font-medium text-gray-400">Beat</label>
-                  <Input id="pfs-beat" type="text" placeholder="$0.00" className="w-full bg-[#1A2433] border-[#374151]" defaultValue="$156,250.00" />
-                </div>
-                <div className="space-y-2">
-                  <label htmlFor="pfs-notes" className="text-sm font-medium text-gray-400">Notes</label>
-                  <Textarea id="pfs-notes" placeholder="Enter notes" className="w-full bg-[#1A2433] border-[#374151] h-24" />
-                </div>
-              </div>
+            {/* --- Recorded PFS List --- */}
+            <div>
+               <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-lg font-medium text-white">Recorded PFS</h3>
+                  {/* Add Buttons Container */}
+                  <div className="flex gap-2">
+                    {/* Add Generate PFS Button */}
+                    <Button className="bg-blue-600 hover:bg-blue-700 text-white" size="sm">
+                      <FileText className="w-4 h-4 mr-2" />
+                      Generate PFS
+                    </Button>
+                    {/* Add PFS Record Button */}
+                    <Button variant="outline" size="sm" className="bg-[#1A2433] border-[#374151] hover:bg-[#243042] text-gray-300">
+                      <PlusCircle className="w-4 h-4 mr-2" />
+                      Add PFS Record
+                    </Button>
+                  </div>
+               </div>
+               <div className="space-y-3">
+                  {/* Map over pfsList state */}
+                  {pfsList.length > 0 ? (
+                    pfsList.map((pfs) => ( // Use pfsList state here
+                      <div key={pfs.id} className="bg-[#151F2D] p-3 rounded-lg flex justify-between items-center">
+                         <div className="flex items-center gap-3">
+                           <FileText className="w-5 h-5 text-blue-400" />
+                           <div>
+                             <p className="text-white font-medium">{pfs.amount}</p>
+                             <p className="text-xs text-gray-400">{pfs.type} - Filed: {pfs.fileDate}</p>
+                           </div>
+                         </div>
+                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                           pfs.status === 'Rejected' || pfs.status === 'Expired' ? 'bg-red-900/50 text-red-400' :
+                           pfs.status === 'Accepted' ? 'bg-green-900/50 text-green-400' :
+                           pfs.status === 'Served' ? 'bg-blue-900/50 text-blue-400' :
+                           'bg-yellow-900/50 text-yellow-400' // Drafting, Pending Signature, Request Approval
+                         }`}>
+                           {pfs.status}
+                         </span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500 text-sm text-center py-4">No PFS recorded.</p>
+                  )}
+               </div>
             </div>
-
-            {/* Defendants Block */}
-             <div className="space-y-2 pt-4 border-t border-gray-700 mt-4">
-                <label className="text-sm font-medium text-gray-400 flex flex-col">
-                  Defendants
-                  <span className="text-xs text-gray-500">Field needs a value for button to be visible.</span>
-                </label>
-                {/* Placeholder for Defendant Display - Fetch/Map actual defendants */} 
-                <div className="bg-[#1A2433] border border-[#374151] rounded p-4 text-sm">
-                  <p className="font-medium text-white">Another Entity</p>
-                  <p className="text-gray-400">Client Name</p> 
-                  <p className="text-gray-400">Josh Yazdiya - 11/14/2024</p>
-                  {/* Map through client.defendants here later */}
-                </div>
-             </div>
-
-            {/* Files Section */}
-            <div className="pt-4 border-t border-gray-700 mt-4">
-              <h3 className="text-lg font-medium text-white mb-4">Files</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Left File Column */}
-                 <div className="space-y-4">
-                    <div className="flex gap-2 flex-wrap">
-                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700">Cover Letter</Button>
-                      <Button size="sm" variant="outline" className="border-blue-600 text-blue-400 hover:bg-blue-900/50 hover:text-blue-300">Authorization (Not Signed)</Button>
-                    </div>
-                     <div className="space-y-2">
-                      <label htmlFor="link-auth" className="text-sm font-medium text-gray-400">Link to Authorization</label>
-                       <Input id="link-auth" type="text" className="w-full bg-[#1A2433] border-[#374151]" defaultValue="https://www.dropbox.com/scl/fi/49ispf7mi9..." />
-                    </div>
-                     <div className="space-y-2">
-                      <label htmlFor="link-cover" className="text-sm font-medium text-gray-400">Link to Cover Letter</label>
-                       <Input id="link-cover" type="text" className="w-full bg-[#1A2433] border-[#374151]" defaultValue="https://www.dropbox.com/scl/fi/e1wdx5nf0..." />
-                    </div>
-                 </div>
-                 {/* Right File Column */}
-                 <div className="space-y-4">
-                    <div className="flex gap-2 flex-wrap">
-                      <Button size="sm" className="bg-blue-600 hover:bg-blue-700">PFS</Button>
-                    </div>
-                    <div className="space-y-2">
-                      <label htmlFor="auth-signed" className="text-sm font-medium text-gray-400">Authorization Signed</label>
-                      <Input id="auth-signed" type="text" placeholder="Link or Date" className="w-full bg-[#1A2433] border-[#374151]" />
-                    </div>
-                    <div className="space-y-2">
-                      <label htmlFor="link-pfs" className="text-sm font-medium text-gray-400">Link to PFS</label>
-                      <Input id="link-pfs" type="text" className="w-full bg-[#1A2433] border-[#374151]" defaultValue="https://www.dropbox.com/scl/fi/3i9wuzpg8..." />
-                    </div>
-                 </div>
-              </div>
-            </div>
+            {/* --- END Recorded PFS List --- */}
           </div>
         )}
       </div>

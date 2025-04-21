@@ -20,7 +20,7 @@ interface ClientDetailsProps {
 interface Document {
   id: string
   title: string
-  type: "BI Demand" | "UM Demand" | "Medical Records" | "Other"
+  type: "BI Demand" | "UM Demand" | "Medical Records" | "Other" | "CRN"
   date: string
   size: string
 }
@@ -59,7 +59,7 @@ export function ClientDetails({ client }: ClientDetailsProps) {
     mediationPretrial: false,
     expertReportsMedical: false,
     cmeDetails: false,
-    depositions: false // Add state for the new section
+    depositions: false
   })
   const [documents, setDocuments] = useState<Document[]>([])
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null)
@@ -105,57 +105,6 @@ export function ClientDetails({ client }: ClientDetailsProps) {
     ]
     setDocuments(initialDocs)
   }, [])
-
-  useEffect(() => {
-    const storedDemandType = localStorage.getItem('generatedDemandType')
-    const storedDemandTime = localStorage.getItem('generatedDemandTime')
-    if (storedDemandType && storedDemandTime) {
-      const demandTime = parseInt(storedDemandTime)
-      const now = new Date().getTime()
-      if (now - demandTime < 300000) {
-        const newDoc: Document = {
-          id: `doc-${Math.random().toString(36).substr(2, 9)}`,
-          title: `${storedDemandType} Demand Letter - ${client.name}`,
-          type: storedDemandType === "BI" ? "BI Demand" : "UM Demand",
-          date: new Date().toLocaleDateString(),
-          size: "0.8 MB"
-        }
-        setDocuments(prev => [newDoc, ...prev])
-        localStorage.removeItem('generatedDemandType')
-        localStorage.removeItem('generatedDemandTime')
-      }
-    }
-  }, [client.name])
-
-  useEffect(() => {
-    const checkForNewDocuments = () => {
-      const storedDemandType = localStorage.getItem('generatedDemandType')
-      const storedDemandTime = localStorage.getItem('generatedDemandTime')
-      if (storedDemandType && storedDemandTime) {
-        const demandTime = parseInt(storedDemandTime)
-        const now = new Date().getTime()
-        if (now - demandTime < 300000) {
-          setDocuments(prev => {
-            if (prev.some(doc => doc.title.includes(storedDemandType))) {
-              return prev;
-            }
-            const newDoc: Document = {
-              id: `doc-${prev.length + 1}`,
-              title: `${storedDemandType} Demand Letter - ${client.name}`,
-              type: storedDemandType === "BI" ? "BI Demand" : "UM Demand",
-              date: new Date().toLocaleDateString(),
-              size: "0.8 MB"
-            }
-            localStorage.removeItem('generatedDemandType')
-            localStorage.removeItem('generatedDemandTime')
-            return [newDoc, ...prev];
-          });
-        }
-      }
-    }
-    const interval = setInterval(checkForNewDocuments, 5000)
-    return () => clearInterval(interval)
-  }, [client.name])
 
   const handleViewDocument = (document: Document) => {
     setSelectedDocument(document)
@@ -315,6 +264,29 @@ export function ClientDetails({ client }: ClientDetailsProps) {
               ) : (
                 <p className="text-[14px] leading-[24px] text-gray-300">No recent treatments recorded.</p>
               )}
+          </div>
+
+          <div className="w-full bg-[#0E1826] rounded-[10px] p-6">
+            <h3 className="text-lg font-semibold text-white mb-4">Recent Documents</h3>
+            <div className="space-y-3">
+              {documents.length > 0 ? documents.slice(0, 5).map((doc) => (
+                <div key={doc.id} className="flex items-center justify-between bg-[#1A2433] p-3 rounded-lg hover:bg-[#243042] cursor-pointer" onClick={() => handleViewDocument(doc)}>
+                  <div className="flex items-center gap-3">
+                    <FileText className="w-5 h-5 text-blue-400" />
+                    <div>
+                      <p className="text-white font-medium">{doc.title}</p>
+                      <p className="text-xs text-gray-400">{doc.type} - {doc.date} ({doc.size})</p>
+                    </div>
+                  </div>
+                  <Eye className="w-4 h-4 text-gray-500" />
+                </div>
+              )) : (
+                <p className="text-gray-500 text-sm">No recent documents.</p>
+              )}
+            </div>
+            {documents.length > 5 && (
+              <Button variant="link" className="text-blue-400 mt-3 px-0">View All Documents</Button>
+            )}
           </div>
           </>
         )}

@@ -79,14 +79,14 @@ export default function CaseManagementDashboard() {
                     <td className="p-4 text-gray-300">
                       <div className="flex items-center gap-2">
                         <Link href={`/client/${client.id}`} className="flex items-center hover:text-blue-400">
-                          <IncidentIcon 
-                            type={client.incidentType} 
-                            className={client.stage === "Presuit" ? "text-green-500" : "text-yellow-500"} 
+                          <IncidentIcon
+                            type={client.incidentType}
+                            className={`${client.stage === "Presuit" ? "text-green-500" : "text-yellow-500"} mr-2`}
                           />
                           <PersonEmoji gender={client.gender} fallback={client.name.charAt(0)} />
-                          <span className="font-bold">{client.name}</span>
+                          <span className="font-bold ml-1">{client.name}</span>
                         </Link>
-                        <Link 
+                        <Link
                           href={`/holy-grail/${client.id}`}
                           className="flex items-center gap-1 px-2 py-1 text-xs bg-[#3A3F5F] text-white rounded hover:bg-[#4A4F6F] transition-colors"
                         >
