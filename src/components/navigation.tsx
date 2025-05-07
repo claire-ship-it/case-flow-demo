@@ -1,7 +1,7 @@
 "use client"
 
 import type { ReactNode } from "react"
-import { ChevronDown, User, FileText, BarChart2 } from "lucide-react"
+import { ChevronDown, User, FileText, BarChart2, Home } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import Image from "next/image"
 import Link from "next/link"
@@ -39,7 +39,9 @@ export function NavItem({ icon, label, href, active = false, badge = false }: Na
 
 export function Sidebar() {
   const pathname = usePathname()
+  const isHomePage = pathname === '/' || pathname === '/home'
   const isClientsPage = pathname === '/client'
+  const isAnalyticsPage = pathname === '/analytics'
 
   return (
     <div className="absolute left-0 top-0 w-[235px] h-full bg-[#0F172A] rounded-md flex flex-col">
@@ -56,12 +58,23 @@ export function Sidebar() {
       </div>
 
       <nav className="p-5 space-y-1">
-
+        <NavItem 
+          icon={<Home size={16} />} 
+          label="Home" 
+          href="/home"
+          active={isHomePage}
+        />
         <NavItem 
           icon={<User size={16} />} 
           label="Clients" 
           href="/client"
           active={isClientsPage}
+        />
+        <NavItem 
+          icon={<BarChart2 size={16} />}
+          label="Analytics" 
+          href="/analytics"
+          active={isAnalyticsPage}
         />
         <NavItem icon={<FileText size={16} />} label="Tasks" />
       </nav>
