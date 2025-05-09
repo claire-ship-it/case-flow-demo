@@ -45,15 +45,11 @@ export function Sidebar() {
 
   return (
     <div className="absolute left-0 top-0 w-[235px] h-full bg-[#0F172A] rounded-md flex flex-col">
-      <div className="p-5 border-b border-gray-800">
-        <div className="relative h-8">
-          <Image
-            src="/logo/Logo_Cropped.png"
-            alt="Call Ryan Logo"
-            fill
-            className="object-contain"
-            priority
-          />
+      <div className="p-5 border-b border-gray-800 flex items-center justify-center h-[61px]">
+        <div className="flex items-center gap-2">
+          <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-300 to-blue-500 tracking-wide">
+            Case Flow
+          </span>
         </div>
       </div>
 
@@ -76,7 +72,7 @@ export function Sidebar() {
           href="/analytics"
           active={isAnalyticsPage}
         />
-        <NavItem icon={<FileText size={16} />} label="Tasks" />
+        {/* <NavItem icon={<FileText size={16} />} label="Tasks" /> */}
       </nav>
 
       <div className="mt-auto p-5 border-t border-gray-800">

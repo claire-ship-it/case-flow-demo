@@ -18,16 +18,16 @@ import Link from "next/link";
 const upcomingTasks = [
   {
     id: "task-1",
-    title: "Prepare deposition for Smith v. Johnson",
-    dueDate: "Today",
+    title: "Prepare BI Demand Document for Smith v. Davis",
+    dueDate: "05/09/2025",
     priority: "High",
-    client: "Johnson, Michael",
+    client: "Smith, John",
     isOverdue: false
   },
   {
     id: "task-2",
     title: "Review medical records for Martinez case",
-    dueDate: "Tomorrow",
+    dueDate: "05/10/2025",
     priority: "Medium",
     client: "Martinez, Sofia",
     isOverdue: false
@@ -35,7 +35,7 @@ const upcomingTasks = [
   {
     id: "task-3",
     title: "Submit settlement proposal for Williams case",
-    dueDate: "Mar 15, 2025",
+    dueDate: "05/11/2025",
     priority: "High",
     client: "Williams, James",
     isOverdue: false
@@ -43,7 +43,7 @@ const upcomingTasks = [
   {
     id: "task-4",
     title: "Schedule client meeting with Thompson",
-    dueDate: "Mar 16, 2025",
+    dueDate: "05/12/2025",
     priority: "Medium",
     client: "Thompson, Lisa",
     isOverdue: false
@@ -51,10 +51,10 @@ const upcomingTasks = [
   {
     id: "task-5",
     title: "Follow up on Garcia medical records",
-    dueDate: "Mar 18, 2025",
+    dueDate: "05/13/2025",
     priority: "Low",
     client: "Garcia, Ana",
-    isOverdue: true
+    isOverdue: false
   }
 ];
 
@@ -63,7 +63,7 @@ const caseMilestones = [
   {
     id: "milestone-1",
     title: "Smith v. Johnson Mediation",
-    date: "Mar 20, 2025",
+    date: "05/14/2025",
     client: "Johnson, Michael",
     type: "Mediation",
     status: "Upcoming"
@@ -71,7 +71,7 @@ const caseMilestones = [
   {
     id: "milestone-2",
     title: "Thompson Case Settlement Conference",
-    date: "Mar 23, 2025",
+    date: "05/15/2025",
     client: "Thompson, Lisa",
     type: "Settlement",
     status: "Upcoming"
@@ -79,7 +79,7 @@ const caseMilestones = [
   {
     id: "milestone-3",
     title: "Williams Trial Date",
-    date: "Apr 5, 2025",
+    date: "05/16/2025",
     client: "Williams, James",
     type: "Trial",
     status: "Preparation"
@@ -87,7 +87,7 @@ const caseMilestones = [
   {
     id: "milestone-4",
     title: "Martinez Medical Evaluation",
-    date: "Apr 12, 2025",
+    date: "05/17/2025",
     client: "Martinez, Sofia",
     type: "Medical",
     status: "Scheduled"
@@ -95,7 +95,7 @@ const caseMilestones = [
   {
     id: "milestone-5",
     title: "Garcia Case Status Conference",
-    date: "Apr 18, 2025",
+    date: "05/18/2025",
     client: "Garcia, Ana",
     type: "Conference",
     status: "Upcoming"

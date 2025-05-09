@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Link, Menu, Calendar, Car, FileCheck, BadgeDollarSign, FileWarning, Clock, FileText, ClipboardList, ScrollText, Loader2 } from "lucide-react"
+import { Link, Menu, Calendar, Car, FileCheck, BadgeDollarSign, FileWarning, Clock, FileText, ClipboardList, ScrollText, Loader2, Phone } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import {
@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/dialog"
 import type { Client } from "@/data/clients"
 import { useRouter } from "next/navigation"
-import { getHeaderTimelinePoints } from "@/utils/timeline"
 
 interface ClientHeaderProps {
   client: Client
@@ -53,48 +52,69 @@ const calculateSOLDate = (dateOfLoss: string): Date => {
   return solDate
 }
 
-// Helper function to get timeline points
-const getTimelinePoints = (client: Client) => {
-  const start = new Date(client.dateOfLoss)
-  const now = new Date()
-  
-  // Calculate specific dates
-  const medicalRecordsDate = new Date(start)
-  medicalRecordsDate.setDate(start.getDate() + 7) // 7 days after date of loss
-
-  const demandDate = new Date(start)
-  demandDate.setDate(start.getDate() + 30) // 30 days after date of loss
-
-  const solDate = calculateSOLDate(client.dateOfLoss)
-
-  const timelinePoints = [
-    {
-      date: medicalRecordsDate.toLocaleDateString(),
-      label: "Medical Records",
-      icon: FileCheck,
-      status: now > medicalRecordsDate ? "completed" : now.toDateString() === medicalRecordsDate.toDateString() ? "current" : "upcoming"
-    },
-    {
-      date: demandDate.toLocaleDateString(),
-      label: "Demand Letter",
-      icon: BadgeDollarSign,
-      status: now > demandDate ? "completed" : now.toDateString() === demandDate.toDateString() ? "current" : "upcoming"
-    },
-    {
-      date: solDate.toLocaleDateString(),
-      label: "SOL Date",
-      icon: Clock,
-      status: now > solDate ? "completed" : now.toDateString() === solDate.toDateString() ? "current" : "upcoming"
-    }
-  ]
-
-  return timelinePoints
-}
+// Helper function to format date as MM/DD/YYYY
+const formatDate = (date: Date): string => {
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+  const year = date.getFullYear();
+  return `${month}/${day}/${year}`;
+};
 
 export function ClientHeader({ client }: ClientHeaderProps) {
   const caseEmoji = getCaseTypeEmoji(client.incidentType)
   const clientEmoji = getClientEmoji(client.gender)
-  const timelinePoints = getHeaderTimelinePoints(client.dateOfLoss, client.statusOfLimitation || "")
+  
+  // New timeline logic
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Normalize today to midnight for accurate date comparisons
+
+  const biDemandDueDate = new Date("2025-05-09T00:00:00"); // Updated to 5/9/2025
+  
+  const medicalRecordsDueDate = new Date(biDemandDueDate);
+  medicalRecordsDueDate.setDate(biDemandDueDate.getDate() - 3); // 5/6/2025
+
+  const policyLimitsDueDate = new Date(medicalRecordsDueDate);
+  policyLimitsDueDate.setDate(medicalRecordsDueDate.getDate() - 4); // 5/2/2025
+
+  const attorneyCallDueDate = new Date(biDemandDueDate);
+  attorneyCallDueDate.setDate(biDemandDueDate.getDate() + 4); // 5/13/2025
+
+  const pipProtocolDueDate = new Date(attorneyCallDueDate);
+  pipProtocolDueDate.setDate(attorneyCallDueDate.getDate() + 5); // 5/18/2025
+
+  const timelinePoints = [
+    {
+      date: formatDate(policyLimitsDueDate),
+      label: "Policy Limits",
+      icon: BadgeDollarSign, // Added BadgeDollarSign for Policy Limits consistency
+      status: today > policyLimitsDueDate ? "completed" : today.getTime() === policyLimitsDueDate.getTime() ? "current" : "upcoming"
+    },
+    {
+      date: formatDate(medicalRecordsDueDate),
+      label: "Medical Records",
+      icon: FileCheck,
+      status: today > medicalRecordsDueDate ? "completed" : today.getTime() === medicalRecordsDueDate.getTime() ? "current" : "upcoming"
+    },
+    {
+      date: formatDate(biDemandDueDate),
+      label: "BI Demand Document",
+      icon: FileText,
+      status: today > biDemandDueDate ? "completed" : today.getTime() === biDemandDueDate.getTime() ? "current" : "upcoming"
+    },
+    {
+      date: formatDate(attorneyCallDueDate),
+      label: "Attorney Call #2",
+      icon: Phone,
+      status: today > attorneyCallDueDate ? "completed" : today.getTime() === attorneyCallDueDate.getTime() ? "current" : "upcoming"
+    },
+    {
+      date: formatDate(pipProtocolDueDate),
+      label: "PIP Protocol Start",
+      icon: ClipboardList, // Added ClipboardList for PIP Protocol consistency
+      status: today > pipProtocolDueDate ? "completed" : today.getTime() === pipProtocolDueDate.getTime() ? "current" : "upcoming"
+    }
+  ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()); // Ensure sorted by date
+
   const router = useRouter()
   
   // New state for demand generation
@@ -113,32 +133,32 @@ export function ClientHeader({ client }: ClientHeaderProps) {
     setIsGenerating(true)
     setShowSuccessMessage(false)
     
-    // Store the demand type and time for the document list to pick up
     localStorage.setItem('generatedDemandType', type)
     localStorage.setItem('generatedDemandTime', Date.now().toString())
     
-    // Add document to global client state (quick and dirty approach)
-    // This is a demo, so we're using localStorage to communicate between components
+    // Adjust title for John Smith to avoid filtering if type is BI
+    let documentTitle = `${type} Demand Letter - ${client.name}`;
+    if (client.name === "John Smith" && type === "BI") {
+      documentTitle = `BI Client Submission - ${client.name}`;
+    }
+
     const newDoc = {
       id: Date.now(),
-      title: `${type} Demand Letter - ${client.name}`,
+      title: documentTitle, // Use the potentially adjusted title
       description: `Generated on ${new Date().toLocaleDateString()}`,
-      icon: "📄",
+      icon: "📄", 
       date: new Date().toLocaleDateString(),
-      type: type === "BI" ? "BI Demand" : "UM Demand",
+      type: type === "BI" ? "BI Generated Doc" : "UM Generated Doc", // Adjusted type slightly too for clarity
       size: "0.8 MB"
     }
     
-    // Store the new document in localStorage
     const existingDocs = JSON.parse(localStorage.getItem('clientDocuments') || '[]')
     localStorage.setItem('clientDocuments', JSON.stringify([newDoc, ...existingDocs]))
     
-    // Simulate generation process with 20 second loading time
     setTimeout(() => {
       setIsGenerating(false)
       setShowSuccessMessage(true)
       
-      // Close dialog after a delay
       setTimeout(() => {
         setShowGeneratingDialog(false)
         setShowSuccessMessage(false)
@@ -238,10 +258,10 @@ export function ClientHeader({ client }: ClientHeaderProps) {
                 <FileText className="mr-2 h-4 w-4" />
                 <span>Holy Grail</span>
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-white hover:bg-[#374151] focus:bg-[#374151]">
+              {/* <DropdownMenuItem className="text-white hover:bg-[#374151] focus:bg-[#374151]">
                 <ClipboardList className="mr-2 h-4 w-4" />
                 <span>Generate CRN</span>
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
               
               {/* Updated Generate Demand with submenu */}
               <DropdownMenuSub>

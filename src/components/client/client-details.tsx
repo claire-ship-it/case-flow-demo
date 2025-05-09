@@ -1,14 +1,13 @@
 "use client"
 
 import { User, Briefcase, Users, CheckCircle, Mail, Phone, Calendar, FileText, ChevronDown, ChevronRight, Link, 
-  Car, FileCheck, BadgeDollarSign, FileWarning, Clock, Star, Info, PhoneCall, Mail as MailIcon, PlusCircle, AlertTriangle, Home, Eye, Download, File } from "lucide-react"
+  Car, FileCheck, BadgeDollarSign, FileWarning, Clock, Star, Info, PhoneCall, Mail as MailIcon, PlusCircle, AlertTriangle, Home, Eye, Download, File, ClipboardList } from "lucide-react"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
 import { type Client } from "@/data/clients"
 import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { getTimelinePoints } from "@/utils/timeline"
 import { Button } from "@/components/ui/button"
 import { DocumentViewer } from "./document-viewer"
 import { LitDetails } from "./lit-details"
@@ -24,6 +23,14 @@ interface Document {
   date: string
   size: string
 }
+
+// Helper function to format date as MM/DD/YYYY (if not already present globally or in utils)
+const formatDateForDetails = (date: Date): string => {
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+  const year = date.getFullYear();
+  return `${month}/${day}/${year}`;
+};
 
 export function ClientDetails({ client }: ClientDetailsProps) {
   const [activeTab, setActiveTab] = useState('overview')
@@ -66,7 +73,58 @@ export function ClientDetails({ client }: ClientDetailsProps) {
   const [isViewerOpen, setIsViewerOpen] = useState(false)
   const [showInsuranceDialog, setShowInsuranceDialog] = useState(false)
   
-  const timelinePoints = getTimelinePoints(client.dateOfLoss, client.statusOfLimitation || "")
+  // New timeline logic for ClientDetails overview tab
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Normalize today 
+
+  // Define the central date for BI Demand
+  const biDemandDueDate = new Date("2025-05-09T00:00:00");
+
+  // Calculate dates relative to BI Demand
+  const medicalRecordsDueDate = new Date(biDemandDueDate);
+  medicalRecordsDueDate.setDate(biDemandDueDate.getDate() - 3); // 3 days before BI Demand -> 5/6/2025
+
+  const policyLimitsDueDate = new Date(medicalRecordsDueDate);
+  policyLimitsDueDate.setDate(medicalRecordsDueDate.getDate() - 4); // 4 days before Medical Records -> 5/2/2025
+
+  const attorneyCallDueDate = new Date(biDemandDueDate);
+  attorneyCallDueDate.setDate(biDemandDueDate.getDate() + 4); // 4 days after BI Demand -> 5/13/2025
+
+  const pipProtocolDueDate = new Date(attorneyCallDueDate);
+  pipProtocolDueDate.setDate(attorneyCallDueDate.getDate() + 5); // 5 days after Attorney Call #2 -> 5/18/2025
+
+  const timelinePoints = [
+    {
+      date: formatDateForDetails(policyLimitsDueDate),
+      label: "Policy Limits",
+      icon: BadgeDollarSign,
+      status: today > policyLimitsDueDate ? "completed" : today.getTime() === policyLimitsDueDate.getTime() ? "current" : "upcoming"
+    },
+    {
+      date: formatDateForDetails(medicalRecordsDueDate),
+      label: "Medical Records",
+      icon: FileCheck,
+      status: today > medicalRecordsDueDate ? "completed" : today.getTime() === medicalRecordsDueDate.getTime() ? "current" : "upcoming"
+    },
+    {
+      date: formatDateForDetails(biDemandDueDate),
+      label: "BI Demand Document",
+      icon: FileText,
+      status: today > biDemandDueDate ? "completed" : today.getTime() === biDemandDueDate.getTime() ? "current" : "upcoming"
+    },
+    {
+      date: formatDateForDetails(attorneyCallDueDate),
+      label: "Attorney Call #2",
+      icon: Phone,
+      status: today > attorneyCallDueDate ? "completed" : today.getTime() === attorneyCallDueDate.getTime() ? "current" : "upcoming"
+    },
+    {
+      date: formatDateForDetails(pipProtocolDueDate),
+      label: "PIP Protocol Start",
+      icon: ClipboardList,
+      status: today > pipProtocolDueDate ? "completed" : today.getTime() === pipProtocolDueDate.getTime() ? "current" : "upcoming"
+    }
+  ].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
   const toggleSection = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({
@@ -216,19 +274,24 @@ export function ClientDetails({ client }: ClientDetailsProps) {
             {expandedSections.timeline && (
                 <div className="relative">
                   <div className="absolute top-4 left-0 w-full h-[2px] bg-gray-700">
-                    <div className="absolute top-0 left-0 h-full bg-blue-500 w-[40%]"></div>
+                    <div 
+                      className="absolute top-0 left-0 h-full bg-blue-500"
+                      style={{
+                        width: `${(timelinePoints.filter(p => p.status === "completed").length / timelinePoints.length) * 100}%`
+                      }}
+                    ></div>
                   </div>
                   <div className="relative flex justify-between pt-8">
                     {timelinePoints.map((point, index) => {
-                      const Icon = index === 0 ? Car : index === 1 ? FileCheck : index === 2 ? BadgeDollarSign : index === 3 ? FileWarning : Clock;
+                      const Icon = point.icon;
                       return (
-                        <div key={index} className="flex flex-col items-center">
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center relative z-10 ${index < 2 ? 'bg-blue-500' : index === 2 ? 'bg-green-500 ring-2 ring-green-300 ring-opacity-50' : 'bg-gray-600'}`}>
-                            <Icon className={`w-4 h-4 ${index < 2 ? 'text-white' : index === 2 ? 'text-white' : 'text-gray-300'}`} />
+                        <div key={index} className="flex flex-col items-center w-[18%]">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center relative z-10 ${point.status === 'completed' ? 'bg-blue-500' : point.status === 'current' ? 'bg-green-500 ring-2 ring-green-300 ring-opacity-50' : 'bg-gray-600'}`}>
+                            <Icon className={`w-4 h-4 ${point.status === 'completed' || point.status === 'current' ? 'text-white' : 'text-gray-300'}`} />
                           </div>
                           <div className="mt-2 text-center">
-                            <p className={`text-xs ${index <= 2 ? 'text-gray-200' : 'text-gray-500'}`}>{point.date}</p>
-                            <p className={`text-sm mt-1 ${index < 2 ? 'text-gray-300' : index === 2 ? 'text-green-400 font-medium' : 'text-gray-500'}`}>{point.label}</p>
+                            <p className={`text-xs ${point.status === 'current' ? 'text-green-400' : 'text-gray-200'}`}>{point.date}</p>
+                            <p className={`text-sm mt-1 ${point.status === 'current' ? 'text-green-400 font-medium' : 'text-gray-300'}`}>{point.label}</p>
                           </div>
                         </div>
                       )

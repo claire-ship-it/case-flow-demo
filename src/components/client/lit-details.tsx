@@ -80,17 +80,29 @@ export function LitDetails({ client, expandedSections, toggleSection, SectionHea
     event.preventDefault();
     console.log("[LitDetails] handleAddOfferSubmit: Function started.");
 
-    // --- Add offer to local state (for immediate UI update in this component) ---
     const formData = new FormData(event.currentTarget);
-    const amount = formData.get('offer-amount') as string || '$0.00';
+    const rawAmount = formData.get('offer-amount') as string || '0';
     const dateRaw = formData.get('offer-date') as string;
     const date = dateRaw ? new Date(dateRaw + 'T00:00:00').toLocaleDateString() : new Date().toLocaleDateString();
     const type = formData.get('offer-type') as string || 'N/A';
     const status = formData.get('offer-status') as string || 'Pending';
 
+    // Format amount as currency
+    let formattedAmount = "$0.00";
+    try {
+      const numericAmount = parseFloat(rawAmount.replace(/[^\d.-]/g, '')); // Clean string before parsing
+      if (!isNaN(numericAmount)) {
+        formattedAmount = numericAmount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+      }
+    } catch (e) {
+      console.error("Could not parse offer amount for formatting:", rawAmount, e);
+      // Fallback to a simple $ prefix if parsing/formatting fails
+      formattedAmount = `$${rawAmount}`;
+    }
+
     const newOffer: Offer = {
         id: `offer-${Date.now()}`,
-        amount: amount,
+        amount: formattedAmount, // Use formatted amount
         date: date,
         type: type.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase()),
         status: status.charAt(0).toUpperCase() + status.slice(1)
@@ -98,44 +110,38 @@ export function LitDetails({ client, expandedSections, toggleSection, SectionHea
     console.log("[LitDetails] handleAddOfferSubmit: Adding offer to local state:", newOffer);
     setOffers(prevOffers => [newOffer, ...prevOffers]);
 
-    // --- Close dialog and show temporary message ---
-    console.log("[LitDetails] handleAddOfferSubmit: Closing dialog.");
     setIsAddOfferDialogOpen(false);
     setShowCrnMessage(true);
     setTimeout(() => {
       setShowCrnMessage(false);
     }, 5000);
 
-    // --- Update localStorage['clientDocuments'] after delay ---
-    console.log("[LitDetails] handleAddOfferSubmit: Starting 30s delay for CRN document localStorage update.");
     setTimeout(() => {
       console.log("[LitDetails] handleAddOfferSubmit: (After 30s delay) Updating 'clientDocuments' in localStorage.");
-
-      // Helper function to get CRN HTML using the provided template
       const getCrnHtml = (clientData: Client): string => {
-        const safeName = clientData.name || 'John Smith'; // Use client name or default
-        const safeAddress = clientData.address || '123 Main St, Tampa, FL 33601'; // Use client address or default
-        const safeEmail = clientData.email || 'john.smith@email.com'; // Use client email or default
-
-        // *** Use the exact HTML provided by the user ***
+        const safeName = clientData.name || 'John Smith'; 
+        const safeAddress = clientData.address || '123 Main St, Tampa, FL 33601';
+        const safeEmail = clientData.email || 'john.smith@email.com';
         return `<!DOCTYPE html><html lang="en"><head>   <meta charset="UTF-8">   <meta name="viewport" content="width=device-width, initial-scale=1.0">   <title>Civil Remedy Notice</title></head><body style="margin: 0; padding: 0;">   <div style="font-family: 'Times New Roman', Times, serif; font-size: 12pt; margin-left: 0.5in; text-align: left;">       Complainant: ${safeName}<br>       <br>       ${safeAddress} <br>       Tampa,  FL 33601<br>       <br>       Email: ${safeEmail}<br>       <br>       BI Insured: Jason Miller<br>       <br>       BI Claim Number: CLM-345678<br>       <br>       BI Policy Number: PRG-456789123<br>       <br>       Progressive<br>       789 Insurance Ave<br>       Orchard City, CA 90210<br>       <br>       BI Claims Specialist: Michael Brown<br>       <br>       (555) 345-6789<br>       michael.brown@progressive.com<br>       <br>       <a href="mailto:Ryan@RyanHughesLaw.com" style="color: blue; text-decoration: underline;">Ryan@RyanHughesLaw.com</a>   </div><br><div style="font-family: 'Times New Roman', Times, serif; font-size: 12pt; margin-left: 0.5in; text-align: left;">   Reasons for Notice:<br>   <br>   <b>Claim Denial<br>   Claim Delay<br>   Unsatisfactory Settlement Offer<br>   Unfair Trade Practice<br>   Other: Failure to Tender</b><br>   <br>   <table style="width: 100%; border-collapse: collapse;">       <tr>           <td style="width: 50px; border: 1px solid #999; padding: 3pt; vertical-align: top;"><b>Re<br>mo<br>ve</b></td>           <td style="border: 1px solid #999; padding: 3pt;"><b>Other:</b> Progressive <b>has substantially delayed the claim refusing to make a reasonable offer in response to the Complainant's demand and showing of sufficient evidence</b></td>       </tr>       <tr>           <td style="width: 50px; border: 1px solid #999; padding: 3pt; vertical-align: top;"><b>Re<br>mo<br>ve</b></td>           <td style="border: 1px solid #999; padding: 3pt;"><b>Other:</b> Progressive <b>has not conducted a full and prompt investigation of the facts and circumstances of this loss</b></td>       </tr>       <tr>           <td style="width: 50px; border: 1px solid #999; padding: 3pt; vertical-align: top;"><b>Re<br>mo<br>ve</b></td>           <td style="border: 1px solid #999; padding: 3pt;"><b>Other:</b> Progressive <b>has not trained, supervised, or managed its adjusters properly so that prompt and full payment of policy limits could be tendered upon showing of sufficient evidence</b></td>       </tr>       <tr>           <td style="width: 50px; border: 1px solid #999; padding: 3pt; vertical-align: top;"><b>Re<br>mo<br>ve</b></td>           <td style="border: 1px solid #999; padding: 3pt;"><b>Other:</b> Progressive <b>is forcing the insured to litigate in order to obtain coverage under the insurance policy</b></td>       </tr>       <tr>           <td style="width: 50px; border: 1px solid #999; padding: 3pt; vertical-align: top;"><b>Re<br>mo<br>ve</b></td>           <td style="border: 1px solid #999; padding: 3pt;"><b>Other:</b> Progressive <b>has failed to pay the full value of the claim</b></td>       </tr>       <tr>           <td style="width: 50px; border: 1px solid #999; padding: 3pt; vertical-align: top;"><b>Re<br>mo<br>ve</b></td>           <td style="border: 1px solid #999; padding: 3pt;"><b>Other:</b> Progressive <b>has exploited the financial vulnerability of the insured to obtain a favorable settlement</b></td>       </tr>   </table></div><div style="font-family: 'Times New Roman', Times, serif; font-size: 12pt; margin-left: 0.5in; text-align: left;">    <p style="margin: 24pt 0 12pt 0;"><b>PURSUANT TO SECTION 624.155, F.S.</b> please indicate all statutory provisions alleged to have been violated.</p>    <p style="margin: 0 0 12pt 0;"><b>624.155(1)(b)(1)</b><br>    <b>Not attempting in good faith to settle claims when, under all the circumstances, it could and should have done so, had it acted fairly and honestly toward its insured and with due regard for her or his interests.</b></p>    <p style="margin: 0 0 12pt 0;"><b>626.9541(1)(i)(3)(a)</b><br>    <b>Failing to adopt and implement standards for the proper investigation of claims.</b></p>    <p style="margin: 0 0 12pt 0;"><b>626.9541(1)(i)(3)(d)</b><br>    <b>Denying claims without conducting reasonable investigations based upon available information.</b></p>    <p style="margin: 24pt 0 12pt 0;"><b>Policy Provisions:</b><br>    <b>"We will pay damages for "bodily injury" or "property damage" for which any "insured" becomes legally responsible because of an auto accident. Damages include prejudgment interest awarded against the "insured". We will settle or defend, as we consider appropriate, any claim or suit asking for these damages. In addition to our limit of liability, we will pay all defense costs we incur. Our duty to settle or defend ends when our limit of liability for this coverage has been exhausted by payment of judgments or settlements. We have no duty to defend any suit or settle any claim for "bodily injury" or "property damage" not covered under this policy."</b></p></div><div style="font-family: 'Times New Roman', Times, serif; font-size: 12pt; margin-left: 0.5in; text-align: left;">   <p style="margin: 0 0 12pt 0;"><b><u>CRN TEXT:</u></b></p>   <p style="margin: 0 0 12pt 0;">The subject crash occurred on Friday, March 15, 2024, at approximately 10:30 AM, at the intersection of Fletcher Avenue and Bruce B Downs Boulevard. Vehicle 1, operated by Jason Miller (the insured), was traveling northbound on Bruce B Downs Boulevard, while Vehicle 2, driven by ${safeName}, was traveling eastbound on Fletcher Avenue in the through lane. The insured failed to stop at a red light, proceeding through the intersection and causing a T-bone collision with Mr. Smith's vehicle. The insured was cited for failing to stop at a red light and careless driving. Mr. Smith was properly restrained, operating his vehicle lawfully with a green light, and no citations were issued against him. Liability rests solely with the insured due to their failure to stop at the red light, and no liability rests with ${safeName}.</p>   <p style="margin: 0 0 12pt 0;">Mr. Smith received care at multiple facilities including Advent Health Surgery Center, Active Wellness & Rehabilitation Center, and Tampa Bay Imaging. His treatment included physical therapy, orthopedic evaluation, diagnostic imaging such as X-rays and MRIs, and rehabilitation. Diagnoses included cervical strain, thoracic strain, lumbar strain, muscle spasms, and post-traumatic headaches. The medical bills total approximately $7,500.00, with treatment ongoing and pain symptoms persisting.</p>   <p style="margin: 0 0 12pt 0;">Despite numerous opportunities to settle this claim within the policy limits, Progressive has failed to make a good faith effort to resolve the matter. No reasonable offer has been extended. This lack of timely adjustment and refusal to tender the $75,000 BI policy limits has placed their insured, Jason Miller, at significant financial risk.</p>   <p style="margin: 0 0 12pt 0;">${safeName} hereby files this Civil Remedy Notice with the opportunity for Progressive to cure the violations within 60 days of receipt. Tender of the full $75,000 policy limits to "Ryan T. Hughes trust account, for the benefit of ${safeName}" will be considered a full and final settlement of all claims stemming from this incident. Failure to do so may result in a statutory bad faith action pursuant to Florida Statutes, including potential recovery of interest, attorneys' fees, and costs. This CRN serves as formal notice to Progressive of its statutory duties and the consequences of its ongoing inaction.</p></div></body></html>`;
       }
 
-      // 1. Create the new CRN document object, ensuring htmlContent is assigned
+      let crnTitle = `Civil Remedy Notice - ${client.name}`;
+      if (client.name === "John Smith") {
+        crnTitle = `CRN Filing - ${client.name}`; // Adjusted title for John Smith
+      }
+
       const newCrnDocument: ClientDocument = {
         id: `generated-CRN-${Date.now()}`,
-        title: `Civil Remedy Notice - ${client.name}`,
+        title: crnTitle, // Use potentially adjusted title
         type: "CRN",
         date: new Date().toLocaleDateString(),
         size: "0.2 MB",
         description: `Generated on ${new Date().toLocaleDateString()}`,
-        htmlContent: getCrnHtml(client) // Assign the correct HTML content
+        htmlContent: getCrnHtml(client)
       };
-      // Log the object to verify content before saving
-      console.log("[LitDetails] handleAddOfferSubmit: New CRN Document Object being created:", JSON.stringify(newCrnDocument)); // Log the stringified object
+      console.log("[LitDetails] handleAddOfferSubmit: New CRN Document Object being created:", JSON.stringify(newCrnDocument));
 
       try {
-        // 2. Read existing documents from localStorage
         const storedDocsString = localStorage.getItem('clientDocuments');
         let existingDocs: ClientDocument[] = [];
         if (storedDocsString) {
@@ -147,24 +153,16 @@ export function LitDetails({ client, expandedSections, toggleSection, SectionHea
             }
           } catch (parseError) {
              console.error("[LitDetails] handleAddOfferSubmit: Error parsing localStorage['clientDocuments']:", parseError);
-             existingDocs = []; // Reset on parse error
+             existingDocs = [];
           }
         }
-        console.log(`[LitDetails] handleAddOfferSubmit: Found ${existingDocs.length} existing docs in localStorage.`);
-
-        // 3. Prepend the new document
         const updatedDocs = [newCrnDocument, ...existingDocs];
-        console.log(`[LitDetails] handleAddOfferSubmit: Updated docs array contains ${updatedDocs.length} docs.`);
-
-        // 4. Write the updated array back to localStorage
         localStorage.setItem('clientDocuments', JSON.stringify(updatedDocs));
         console.log("[LitDetails] handleAddOfferSubmit: Successfully updated 'clientDocuments' in localStorage.");
-
       } catch (error) {
         console.error("[LitDetails] handleAddOfferSubmit: Error updating localStorage['clientDocuments']:", error);
       }
-
-    }, 30000); // 30 seconds delay
+    }, 30000);
   };
 
   // Effect to clear message if section is collapsed/re-expanded (optional cleanup)
